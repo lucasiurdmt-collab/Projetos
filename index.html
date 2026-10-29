@@ -100,6 +100,37 @@
       font-weight: 600;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-top-telao {
+      background: var(--laranja);
+      color: white;
+      text-decoration: none;
+      font-family: var(--font-display);
+      font-weight: 800;
+      padding: 10px 20px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      box-shadow: 0 4px 0 var(--laranja-sombra);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-top-telao:hover {
+      background: var(--laranja-2);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 var(--laranja-sombra);
+    }
+
     .screen-status-pill {
       display: inline-flex;
       align-items: center;
@@ -448,9 +479,14 @@
       </div>
     </div>
 
-    <div class="screen-status-pill">
-      <span class="status-dot" id="status-dot"></span>
-      <span id="status-text">Aguardando Telão vMix...</span>
+    <div class="header-actions">
+      <div class="screen-status-pill">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-text">Aguardando Telão vMix...</span>
+      </div>
+      <a href="telao.html" target="_blank" class="btn-top-telao">
+        🖥️ ABRIR TELÃO (LED / vMix) ↗
+      </a>
     </div>
   </header>
 
@@ -458,14 +494,17 @@
   <div class="vmix-banner" style="width: 100%; max-width: 1050px;">
     <div class="vmix-info">
       <h4>🖥️ Telão de Exibição / vMix (LED)</h4>
-      <p>Abra o telão no projetor/painel de LED ou adicione o link como <strong>Web Browser Input no vMix</strong>.</p>
+      <p>Abra o telão no projetor/painel de LED ou envie como <strong>Web Browser Input no vMix</strong>.</p>
     </div>
     <div class="vmix-actions">
-      <a href="telao.html" target="_blank" class="btn-action primary">
-        ↗ Abrir Telão em Nova Aba
+      <a href="telao.html" target="_blank" class="btn-action primary" style="font-weight: 800;">
+        🖥️ ABRIR TELA DO TELÃO ↗
       </a>
-      <button class="btn-action" onclick="copyTelaoLink()">
-        📋 Copiar Link do vMix
+      <button class="btn-action" onclick="copyTelaoLink(false)">
+        📋 Copiar Link (Fundo Roxo)
+      </button>
+      <button class="btn-action" onclick="copyTelaoLink(true)" title="Fundo transparente para usar sobre a câmera no vMix">
+        ✨ Copiar Link (Transparente)
       </button>
     </div>
   </div>
@@ -588,10 +627,13 @@
     checkTelao();
 
     // --- Copiar Link Direto para o vMix ---
-    function copyTelaoLink() {
-      const url = new URL('telao.html', window.location.href).href;
+    function copyTelaoLink(transparent = false) {
+      let url = new URL('telao.html', window.location.href).href;
+      if (transparent) {
+        url += (url.includes('?') ? '&' : '?') + 'transparent=true';
+      }
       navigator.clipboard.writeText(url).then(() => {
-        alert('Link do Telão copiado com sucesso!\n\nCole no vMix (Add Input > Web Browser):\n' + url);
+        alert((transparent ? '✨ Link Transparente (Overlay vMix)' : '📋 Link Padrão do Telão') + ' copiado com sucesso!\n\nCole no vMix (Add Input > Web Browser):\n' + url);
       }).catch(() => {
         prompt('Copie o link do telão abaixo:', url);
       });
