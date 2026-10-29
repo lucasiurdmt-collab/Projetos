@@ -376,15 +376,25 @@
 
     </div>
 
-    <!-- Card de Confirmação (Sucesso) -->
+    <!-- Card de Confirmação (Sucesso / Aparelho Bloqueado) -->
     <div class="card success-card" id="success-card">
       <div class="success-icon">✓</div>
-      <h2 class="success-title">Inscrição Confirmada!</h2>
-      <p class="success-desc">Seus dados já foram registrados nos servidores da Google e você já está concorrendo!</p>
+      <h2 class="success-title" id="success-title">Inscrição Confirmada!</h2>
+      <p class="success-desc" id="success-desc">Seus dados já foram registrados nos servidores da Google e seu aparelho está vinculado ao sorteio!</p>
 
       <div class="ticket-badge">
         <p style="font-size: 0.8rem; color: var(--lilas); text-transform: uppercase;">Participante Registrado:</p>
         <div class="ticket-name" id="ticket-user-name">Maria Silva</div>
+        <p style="font-size: 0.78rem; color: var(--creme); opacity: 0.8; margin-top: 6px;" id="ticket-number">Bilhete #SORTEIO-0000</p>
+      </div>
+
+      <div style="background: rgba(230, 57, 70, 0.15); border: 1px solid var(--laranja); border-radius: 12px; padding: 10px 14px; margin-bottom: 20px;">
+        <p style="font-size: 0.82rem; color: #ff8a4c; font-weight: 700;">
+          🔒 Limite de 1 inscrição por aparelho ativado.
+        </p>
+        <p style="font-size: 0.75rem; color: var(--creme); opacity: 0.85;">
+          Para garantir a justiça do evento, este celular já concluiu sua participação.
+        </p>
       </div>
 
       <p style="font-size: 0.9rem; color: var(--creme);">
@@ -401,10 +411,10 @@
   <script>
     // =========================================================================
     // CONFIGURAÇÃO DO BACKEND GOOGLE
-    // Cole aqui o link do seu Google Forms ou Google Apps Script Web App!
+    // Quando você criar seu Google Forms, colocamos a URL dele aqui!
     // =========================================================================
     const GOOGLE_CONFIG = {
-      // Opção A: URL do seu Google Forms (terminada em /formResponse)
+      // URL do formulário Google (formResponse)
       formUrl: "https://docs.google.com/forms/d/e/SEU_FORM_ID_AQUI/formResponse",
       
       // IDs dos campos dentro do seu Google Forms (ex: entry.12345678)
@@ -412,17 +422,68 @@
       entryPhone: "entry.222222222",
       entryConfirmed: "entry.333333333",
 
-      // Opção B: URL do Google Apps Script (se preferir via Script)
+      // Alternativa: URL do Google Apps Script (se preferir)
       scriptUrl: "" 
     };
 
+    // =========================================================================
+    // SEGURANÇA: VALIDAÇÃO DE APARELHO ÚNICO (DEVICE LOCK)
+    // Impede que o mesmo celular seja usado para fazer dezenas de inscrições
+    // =========================================================================
+    function getDeviceRegistration() {
+      // 1. Tenta carregar do localStorage
+      const local = localStorage.getItem('sorteio_device_registered');
+      if (local) {
+        try { return JSON.parse(local); } catch (e) {}
+      }
+
+      // 2. Fallback de verificação por Cookie
+      const match = document.cookie.match(/(^|;)\s*sorteio_reg=([^;]+)/);
+      if (match) {
+        try { return JSON.parse(decodeURIComponent(match[2])); } catch (e) {}
+      }
+
+      return null;
+    }
+
+    function saveDeviceRegistration(data) {
+      localStorage.setItem('sorteio_device_registered', JSON.stringify(data));
+      // Salva cookie válido por 30 dias
+      const expires = new Date(Date.now() + 30 * 864e5).toUTCString();
+      document.cookie = `sorteio_reg=${encodeURIComponent(JSON.stringify(data))}; expires=${expires}; path=/; SameSite=Lax`;
+    }
+
+    // Ao carregar a página, checa se este celular já se cadastrou
+    window.addEventListener('DOMContentLoaded', () => {
+      const reg = getDeviceRegistration();
+      if (reg) {
+        showAlreadyRegistered(reg);
+      }
+    });
+
+    function showAlreadyRegistered(reg) {
+      document.getElementById('form-card').style.display = 'none';
+      document.getElementById('success-title').innerText = 'Aparelho Já Inscrito!';
+      document.getElementById('success-desc').innerText = 'Este celular já concluiu a inscrição no sorteio. Boa sorte no evento!';
+      document.getElementById('ticket-user-name').innerText = reg.name || 'Participante';
+      document.getElementById('ticket-number').innerText = 'Bilhete: ' + (reg.ticket || '#SORTEIO-OK');
+      document.getElementById('success-card').style.display = 'block';
+    }
+
     function markYtVisited() {
-      // Opcional: marca visualmente que a pessoa clicou no botão do YouTube
       document.getElementById('check-subscribed').checked = true;
     }
 
     async function submitToGoogle(e) {
       e.preventDefault();
+
+      // Checagem de segurança anti-fraude no aparelho
+      const existing = getDeviceRegistration();
+      if (existing) {
+        alert('Este aparelho já realizou uma inscrição anterior e não pode enviar novamente.');
+        showAlreadyRegistered(existing);
+        return;
+      }
 
       const name = document.getElementById('user-name').value.trim();
       const phone = document.getElementById('user-phone').value.trim();
@@ -435,7 +496,10 @@
       }
 
       btn.disabled = true;
-      btn.innerText = 'Enviando aos servidores...';
+      btn.innerText = 'Validando e enviando...';
+
+      // Gera código de bilhete único para o participante
+      const randomTicket = '#TICKET-' + Math.floor(100000 + Math.random() * 900000);
 
       // 1. Se estiver configurado o Google Apps Script Web App:
       if (GOOGLE_CONFIG.scriptUrl) {
@@ -444,7 +508,7 @@
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, phone, confirmed, timestamp: new Date().toISOString() })
+            body: JSON.stringify({ name, phone, ticket: randomTicket, confirmed, timestamp: new Date().toISOString() })
           });
         } catch (err) {}
       } 
@@ -464,16 +528,26 @@
         } catch (err) {}
       }
 
-      // Salva localmente também como garantia extra de backup
+      // 3. GRAVA A TRAVA DE APARELHO (Bloqueia reenvio no celular)
+      const registrationData = {
+        name: name,
+        phone: phone,
+        ticket: randomTicket,
+        registeredAt: new Date().toLocaleString()
+      };
+      saveDeviceRegistration(registrationData);
+
+      // Salva backup local
       try {
         const localList = JSON.parse(localStorage.getItem('sorteio_self_registered') || '[]');
-        localList.push({ name, phone, time: new Date().toLocaleTimeString() });
+        localList.push(registrationData);
         localStorage.setItem('sorteio_self_registered', JSON.stringify(localList));
       } catch (e) {}
 
-      // Exibe a tela de confirmação
+      // Exibe tela de confirmação
       document.getElementById('form-card').style.display = 'none';
       document.getElementById('ticket-user-name').innerText = name;
+      document.getElementById('ticket-number').innerText = 'Bilhete: ' + randomTicket;
       document.getElementById('success-card').style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }

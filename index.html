@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mesa de Controle - Sorteio (Produção)</title>
+  <title>Mesa de Controle - Sorteio (Acesso Restrito)</title>
 
   <!-- Google Fonts: Bricolage Grotesque e DM Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,7 +16,7 @@
   <style>
     :root {
       --roxo: #1d0d45;
-      --roxo-card: rgba(44, 23, 102, 0.88);
+      --roxo-card: rgba(44, 23, 102, 0.9);
       --lilas: #b8a4ff;
       --laranja: #e2652a;
       --laranja-2: #ff8a4c;
@@ -49,7 +49,117 @@
       line-height: 1.5;
     }
 
-    /* Barra Superior */
+    /* Tela de Bloqueio por Senha (Overlay) */
+    #lock-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 7, 36, 0.96);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .lock-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--roxo-card);
+      border: 1px solid rgba(184, 164, 255, 0.3);
+      border-radius: 28px;
+      padding: 40px 28px;
+      text-align: center;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+    }
+
+    .lock-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--laranja);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 18px;
+      font-size: 1.8rem;
+      box-shadow: 0 4px 0 var(--laranja-sombra);
+    }
+
+    .lock-title {
+      font-family: var(--font-display);
+      font-size: 1.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .lock-desc {
+      font-size: 0.9rem;
+      color: var(--lilas);
+      margin-bottom: 25px;
+    }
+
+    .lock-input {
+      width: 100%;
+      background: rgba(29, 13, 69, 0.85);
+      border: 2px solid rgba(184, 164, 255, 0.3);
+      border-radius: 14px;
+      padding: 14px 18px;
+      color: white;
+      font-size: 1.2rem;
+      text-align: center;
+      letter-spacing: 0.2em;
+      margin-bottom: 18px;
+    }
+
+    .lock-input:focus {
+      outline: none;
+      border-color: var(--laranja-2);
+      box-shadow: 0 0 20px rgba(255, 138, 76, 0.4);
+    }
+
+    .btn-unlock {
+      width: 100%;
+      background: var(--laranja);
+      color: white;
+      border: none;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.15rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 14px 20px;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 var(--laranja-sombra);
+      transition: all 0.2s;
+    }
+
+    .btn-unlock:hover {
+      background: var(--laranja-2);
+      transform: translateY(-2px);
+      box-shadow: 0 7px 0 var(--laranja-sombra);
+    }
+
+    .lock-error {
+      color: #f87171;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 12px;
+      display: none;
+    }
+
+    /* Conteúdo Protegido da Mesa de Controle */
+    #protected-content {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
     .header-bar {
       width: 100%;
       max-width: 1050px;
@@ -156,7 +266,82 @@
       box-shadow: 0 0 10px var(--verde);
     }
 
-    /* Container Principal */
+    .btn-logout {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--lilas);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+
+    /* Banners e Grid Principal */
+    .vmix-banner {
+      background: linear-gradient(135deg, rgba(226, 101, 42, 0.18) 0%, rgba(44, 23, 102, 0.85) 100%);
+      border: 1px dashed var(--laranja);
+      border-radius: 18px;
+      padding: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .vmix-info h4 {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      color: var(--laranja-2);
+      text-transform: uppercase;
+    }
+
+    .vmix-info p {
+      font-size: 0.85rem;
+      color: var(--creme);
+      opacity: 0.85;
+    }
+
+    .vmix-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .btn-action.primary {
+      background: var(--laranja);
+      border-color: var(--laranja);
+      box-shadow: 0 3px 0 var(--laranja-sombra);
+    }
+
     .main-grid {
       width: 100%;
       max-width: 1050px;
@@ -192,66 +377,6 @@
       justify-content: space-between;
     }
 
-    /* Banners e Links do Telão */
-    .vmix-banner {
-      background: linear-gradient(135deg, rgba(226, 101, 42, 0.2) 0%, rgba(44, 23, 102, 0.8) 100%);
-      border: 1px dashed var(--laranja);
-      border-radius: 18px;
-      padding: 18px;
-      margin-bottom: 25px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .vmix-info h4 {
-      font-family: var(--font-display);
-      font-size: 1.05rem;
-      color: var(--laranja-2);
-      text-transform: uppercase;
-    }
-
-    .vmix-info p {
-      font-size: 0.85rem;
-      color: var(--creme);
-      opacity: 0.85;
-    }
-
-    .vmix-actions {
-      display: flex;
-      gap: 10px;
-    }
-
-    .btn-action {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: white;
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 0.82rem;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
-    }
-
-    .btn-action:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: translateY(-2px);
-    }
-
-    .btn-action.primary {
-      background: var(--laranja);
-      border-color: var(--laranja);
-      box-shadow: 0 3px 0 var(--laranja-sombra);
-    }
-
-    /* Abas de Entrada */
     .tabs {
       display: flex;
       gap: 8px;
@@ -350,7 +475,6 @@
       box-shadow: 0 3px 0 var(--laranja-sombra);
     }
 
-    /* Master Control Trigger */
     .master-area {
       display: flex;
       flex-direction: column;
@@ -409,7 +533,6 @@
       color: white;
     }
 
-    /* Lista e Histórico */
     .preview-box {
       max-height: 240px;
       overflow-y: auto;
@@ -469,155 +592,220 @@
 </head>
 <body>
 
-  <!-- Topo -->
-  <header class="header-bar">
-    <div class="brand-group">
-      <div class="brand-icon">S</div>
-      <div class="brand-title">
-        Mesa de Controle
-        <span>Painel do Operador · Sorteio</span>
-      </div>
+  <!-- Tela de Bloqueio por Senha -->
+  <div id="lock-overlay">
+    <div class="lock-card">
+      <div class="lock-icon">🔒</div>
+      <h2 class="lock-title">Acesso Restrito</h2>
+      <p class="lock-desc">Digite a senha da equipe de produção para acessar a mesa de controle do sorteio.</p>
+      
+      <form onsubmit="handleUnlock(event)">
+        <input type="password" id="pass-input" class="lock-input" placeholder="••••••••" required autocomplete="current-password" autofocus>
+        <button type="submit" class="btn-unlock">Entrar na Mesa ➔</button>
+        <p class="lock-error" id="lock-error">Senha incorreta. Tente novamente.</p>
+      </form>
     </div>
-
-    <div class="header-actions">
-      <div class="screen-status-pill">
-        <span class="status-dot" id="status-dot"></span>
-        <span id="status-text">Aguardando Telão vMix...</span>
-      </div>
-      <a href="telao.html" target="_blank" class="btn-top-telao">
-        🖥️ ABRIR TELÃO (LED / vMix) ↗
-      </a>
-    </div>
-  </header>
-
-  <!-- Banners de Acesso Rápido -->
-  <div style="width: 100%; max-width: 1050px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 25px;">
-    
-    <!-- Banner 1: Formulário de Cadastro do Público -->
-    <div class="vmix-banner" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(44, 23, 102, 0.8) 100%); border-color: var(--verde);">
-      <div class="vmix-info">
-        <h4 style="color: #34d399;">📱 Formulário de Inscrição Oficial (Para o Público / QR Code)</h4>
-        <p>Tela bonita para o público abrir no celular pelo QR Code, se inscrever no YouTube e preencher o nome.</p>
-      </div>
-      <div class="vmix-actions">
-        <a href="cadastro.html" target="_blank" class="btn-action" style="background: var(--verde); border-color: var(--verde); box-shadow: 0 3px 0 #065f46; font-weight: 800;">
-          📱 ABRIR CADASTRO ↗
-        </a>
-        <button class="btn-action" onclick="copyCadastroLink()">
-          📋 Copiar Link para QR Code
-        </button>
-      </div>
-    </div>
-
-    <!-- Banner 2: Telão para vMix / LED -->
-    <div class="vmix-banner">
-      <div class="vmix-info">
-        <h4>🖥️ Telão de Exibição / vMix (LED)</h4>
-        <p>Abra o telão no projetor/painel de LED ou envie como <strong>Web Browser Input no vMix</strong>.</p>
-      </div>
-      <div class="vmix-actions">
-        <a href="telao.html" target="_blank" class="btn-action primary" style="font-weight: 800;">
-          🖥️ ABRIR TELA DO TELÃO ↗
-        </a>
-        <button class="btn-action" onclick="copyTelaoLink(false)">
-          📋 Copiar Link (Fundo Roxo)
-        </button>
-        <button class="btn-action" onclick="copyTelaoLink(true)" title="Fundo transparente para usar sobre a câmera no vMix">
-          ✨ Copiar Link (Transparente)
-        </button>
-      </div>
-    </div>
-
   </div>
 
-  <main class="main-grid">
+  <!-- Conteúdo Protegido -->
+  <div id="protected-content" style="display: none;">
 
-    <!-- Coluna da Esquerda: Entrada de Dados e Disparo -->
-    <div class="card">
-      <div class="card-title">
-        1. Carregar Participantes
-      </div>
-
-      <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('file')">📂 Planilha Excel / CSV</button>
-        <button class="tab-btn" onclick="switchTab('paste')">✍️ Colar Nomes Direto</button>
-      </div>
-
-      <div id="tab-file">
-        <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
-          <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
-          <p><strong>Clique aqui</strong> ou arraste o arquivo do Forms</p>
-          <span style="font-size: 0.8rem; color: var(--lilas);">Detecta automaticamente a coluna "Nome" (.xlsx, .csv)</span>
-          <input type="file" id="file-input" accept=".xlsx, .xls, .csv, .txt" style="display: none;" onchange="handleFileSelect(event)">
+    <header class="header-bar">
+      <div class="brand-group">
+        <div class="brand-icon">S</div>
+        <div class="brand-title">
+          Mesa de Controle
+          <span>Painel do Operador · Sorteio</span>
         </div>
       </div>
 
-      <div id="tab-paste" style="display: none;">
-        <textarea id="paste-names" placeholder="Copie a coluna com os nomes no Forms/Excel e cole aqui..." oninput="parsePastedNames()"></textarea>
+      <div class="header-actions">
+        <div class="screen-status-pill">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="status-text">Aguardando Telão vMix...</span>
+        </div>
+        <a href="telao.html" target="_blank" class="btn-top-telao">
+          🖥️ ABRIR TELÃO (LED / vMix) ↗
+        </a>
+        <button class="btn-logout" onclick="lockConsole()">Sair 🔒</button>
       </div>
+    </header>
 
-      <div class="options-row">
-        <label class="checkbox-label">
-          <input type="checkbox" id="remove-dups" checked onchange="updateParticipantList()">
-          Remover duplicados automaticamente
-        </label>
-        <div class="counter-pill">
-          <span id="count-number">0</span> Válidos
+    <!-- Banners de Acesso Rápido -->
+    <div style="width: 100%; max-width: 1050px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 25px;">
+      
+      <!-- Banner 1: Formulário de Cadastro do Público -->
+      <div class="vmix-banner" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(44, 23, 102, 0.8) 100%); border-color: var(--verde);">
+        <div class="vmix-info">
+          <h4 style="color: #34d399;">📱 Formulário de Inscrição Oficial (Para o Público / QR Code)</h4>
+          <p>Tela blindada por aparelho para o público abrir no celular, se inscrever no YouTube e preencher o nome.</p>
+        </div>
+        <div class="vmix-actions">
+          <a href="cadastro.html" target="_blank" class="btn-action" style="background: var(--verde); border-color: var(--verde); box-shadow: 0 3px 0 #065f46; font-weight: 800;">
+            📱 ABRIR CADASTRO ↗
+          </a>
+          <button class="btn-action" onclick="copyCadastroLink()">
+            📋 Copiar Link para QR Code
+          </button>
         </div>
       </div>
 
-      <!-- Área de Disparo do Telão -->
-      <div class="master-area">
-        <button id="btn-master-draw" class="btn-master" onclick="triggerDraw()" disabled>
-          🎲 DISPARAR SORTEIO NO TELÃO!
-        </button>
-
-        <button class="btn-secondary" onclick="triggerReset()">
-          🔄 Resetar / Limpar Telão
-        </button>
+      <!-- Banner 2: Telão para vMix / LED -->
+      <div class="vmix-banner">
+        <div class="vmix-info">
+          <h4>🖥️ Telão de Exibição / vMix (LED)</h4>
+          <p>Abra o telão no projetor/painel de LED ou envie como <strong>Web Browser Input no vMix</strong>.</p>
+        </div>
+        <div class="vmix-actions">
+          <a href="telao.html" target="_blank" class="btn-action primary" style="font-weight: 800;">
+            🖥️ ABRIR TELA DO TELÃO ↗
+          </a>
+          <button class="btn-action" onclick="copyTelaoLink(false)">
+            📋 Copiar Link (Fundo Roxo)
+          </button>
+          <button class="btn-action" onclick="copyTelaoLink(true)" title="Fundo transparente para usar sobre a câmera no vMix">
+            ✨ Copiar Link (Transparente)
+          </button>
+        </div>
       </div>
+
     </div>
 
-    <!-- Coluna da Direita: Prévia e Histórico de Vencedores -->
-    <div class="card">
-      <div class="card-title">
-        <span>2. Participantes Carregados</span>
-        <button class="btn-action" style="padding: 4px 10px; font-size: 0.75rem;" onclick="clearList()">Limpar Lista</button>
+    <main class="main-grid">
+
+      <!-- Coluna da Esquerda: Entrada de Dados e Disparo -->
+      <div class="card">
+        <div class="card-title">
+          1. Carregar Participantes
+        </div>
+
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('file')">📂 Planilha Excel / CSV</button>
+          <button class="tab-btn" onclick="switchTab('paste')">✍️ Colar Nomes Direto</button>
+        </div>
+
+        <div id="tab-file">
+          <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+            <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+            <p><strong>Clique aqui</strong> ou arraste o arquivo do Forms</p>
+            <span style="font-size: 0.8rem; color: var(--lilas);">Detecta automaticamente a coluna "Nome" (.xlsx, .csv)</span>
+            <input type="file" id="file-input" accept=".xlsx, .xls, .csv, .txt" style="display: none;" onchange="handleFileSelect(event)">
+          </div>
+        </div>
+
+        <div id="tab-paste" style="display: none;">
+          <textarea id="paste-names" placeholder="Copie a coluna com os nomes no Forms/Excel e cole aqui..." oninput="parsePastedNames()"></textarea>
+        </div>
+
+        <div class="options-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="remove-dups" checked onchange="updateParticipantList()">
+            Remover duplicados automaticamente
+          </label>
+          <div class="counter-pill">
+            <span id="count-number">0</span> Válidos
+          </div>
+        </div>
+
+        <!-- Área de Disparo do Telão -->
+        <div class="master-area">
+          <button id="btn-master-draw" class="btn-master" onclick="triggerDraw()" disabled>
+            🎲 DISPARAR SORTEIO NO TELÃO!
+          </button>
+
+          <button class="btn-secondary" onclick="triggerReset()">
+            🔄 Resetar / Limpar Telão
+          </button>
+        </div>
       </div>
 
-      <div class="preview-box">
-        <ul id="preview-list">
-          <li style="color: var(--lilas); justify-content: center;">Nenhum participante carregado ainda</li>
+      <!-- Coluna da Direita: Prévia e Histórico de Vencedores -->
+      <div class="card">
+        <div class="card-title">
+          <span>2. Participantes Carregados</span>
+          <button class="btn-action" style="padding: 4px 10px; font-size: 0.75rem;" onclick="clearList()">Limpar Lista</button>
+        </div>
+
+        <div class="preview-box">
+          <ul id="preview-list">
+            <li style="color: var(--lilas); justify-content: center;">Nenhum participante carregado ainda</li>
+          </ul>
+        </div>
+
+        <div class="card-title" style="margin-top: 15px;">
+          <span>🏆 Histórico de Ganhadores</span>
+        </div>
+
+        <ul class="history-list" id="history-list">
+          <li style="color: var(--lilas); font-size: 0.85rem; text-align: center; padding: 15px;">
+            Nenhum sorteio realizado nesta sessão.
+          </li>
         </ul>
       </div>
 
-      <div class="card-title" style="margin-top: 15px;">
-        <span>🏆 Histórico de Ganhadores</span>
-      </div>
+    </main>
 
-      <ul class="history-list" id="history-list">
-        <li style="color: var(--lilas); font-size: 0.85rem; text-align: center; padding: 15px;">
-          Nenhum sorteio realizado nesta sessão.
-        </li>
-      </ul>
-    </div>
-
-  </main>
+  </div>
 
   <script>
+    // =========================================================================
+    // SEGURANÇA: CONTROLE DE ACESSO POR SENHA (HASH SHA-256)
+    // Senha padrão inicial: producao2026
+    // (Hash SHA-256 de 'producao2026': 1b24479532d5e75ce7c8ef46eeefb1c7fb2a45a191dbbc5d58f3684a86ce9069)
+    // =========================================================================
+    const MASTER_HASH = "1b24479532d5e75ce7c8ef46eeefb1c7fb2a45a191dbbc5d58f3684a86ce9069";
+
+    async function sha256(message) {
+      const msgBuffer = new TextEncoder().encode(message);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function handleUnlock(e) {
+      e.preventDefault();
+      const input = document.getElementById('pass-input').value;
+      const hashed = await sha256(input);
+
+      // Permite tanto pelo hash quanto fallback direto para "producao2026"
+      if (hashed === MASTER_HASH || input === "producao2026") {
+        sessionStorage.setItem('sorteio_auth', 'true');
+        unlockUI();
+      } else {
+        document.getElementById('lock-error').style.display = 'block';
+        document.getElementById('pass-input').value = '';
+      }
+    }
+
+    function unlockUI() {
+      document.getElementById('lock-overlay').style.display = 'none';
+      document.getElementById('protected-content').style.display = 'flex';
+    }
+
+    function lockConsole() {
+      sessionStorage.removeItem('sorteio_auth');
+      document.getElementById('lock-overlay').style.display = 'flex';
+      document.getElementById('protected-content').style.display = 'none';
+      document.getElementById('pass-input').value = '';
+      document.getElementById('lock-error').style.display = 'none';
+    }
+
+    // Auto-login se já autenticado na mesma sessão
+    if (sessionStorage.getItem('sorteio_auth') === 'true') {
+      unlockUI();
+    }
+
+    // --- Comunicação com o Telão ---
     const channel = new BroadcastChannel('sorteio_channel');
     let rawNames = [];
     let participants = [];
     let winners = [];
     let isDrawing = false;
-    let telaoOnline = false;
     let pingTimeout = null;
 
-    // --- Monitoramento de Conexão do Telão ---
     channel.onmessage = (event) => {
       const data = event.data;
       if (!data) return;
-
       if (data.type === 'SCREEN_ONLINE') {
         setTelaoStatus(true);
       }
@@ -632,7 +820,6 @@
     }
 
     function setTelaoStatus(online) {
-      telaoOnline = online;
       const dot = document.getElementById('status-dot');
       const text = document.getElementById('status-text');
       if (online) {
@@ -647,7 +834,6 @@
     setInterval(checkTelao, 3000);
     checkTelao();
 
-    // --- Copiar Link do Cadastro (para QR Code) ---
     function copyCadastroLink() {
       const url = new URL('cadastro.html', window.location.href).href;
       navigator.clipboard.writeText(url).then(() => {
@@ -657,20 +843,18 @@
       });
     }
 
-    // --- Copiar Link Direto para o vMix ---
     function copyTelaoLink(transparent = false) {
       let url = new URL('telao.html', window.location.href).href;
       if (transparent) {
         url += (url.includes('?') ? '&' : '?') + 'transparent=true';
       }
       navigator.clipboard.writeText(url).then(() => {
-        alert((transparent ? '✨ Link Transparente (Overlay vMix)' : '📋 Link Padrão do Telão') + ' copiado com sucesso!\n\nCole no vMix (Add Input > Web Browser):\n' + url);
+        alert((transparent ? '✨ Link Transparente (Overlay vMix)' : '📋 Link Padrão do Telão') + ' copiado com sucesso!\n\nCole no vMix:\n' + url);
       }).catch(() => {
         prompt('Copie o link do telão abaixo:', url);
       });
     }
 
-    // --- Alternar Abas ---
     function switchTab(tab) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       if (tab === 'file') {
@@ -684,7 +868,6 @@
       }
     }
 
-    // --- Processamento de Arquivos ---
     const dropzone = document.getElementById('dropzone');
     dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.style.borderColor = 'var(--laranja-2)'; });
     dropzone.addEventListener('dragleave', () => { dropzone.style.borderColor = 'rgba(184, 164, 255, 0.35)'; });
@@ -766,7 +949,6 @@
 
       renderPreview();
 
-      // Salva no localStorage e avisa o telão
       localStorage.setItem('sorteio_participants', JSON.stringify(participants));
       const payload = { type: 'UPDATE_PARTICIPANTS', participants: participants };
       channel.postMessage(payload);
@@ -784,13 +966,11 @@
       `).join('') + (participants.length > 50 ? `<li style="color: var(--lilas); justify-content: center;">... e mais ${participants.length - 50} participantes</li>` : '');
     }
 
-    // --- Disparo do Sorteio ---
     function triggerDraw() {
       if (!participants.length || isDrawing) return;
       isDrawing = true;
       document.getElementById('btn-master-draw').disabled = true;
 
-      // Escolhe o ganhador
       const winnerIndex = Math.floor(Math.random() * participants.length);
       const winnerName = participants[winnerIndex];
 
@@ -800,11 +980,9 @@
         participants: participants
       };
 
-      // Dispara via BroadcastChannel e localStorage para sincronia total
       channel.postMessage(payload);
       localStorage.setItem('sorteio_cmd', JSON.stringify({ ...payload, ts: Date.now() }));
 
-      // Registra ganhador no histórico da produção após a animação (5.2s)
       setTimeout(() => {
         const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         winners.unshift({ name: winnerName, time: timeStr });
