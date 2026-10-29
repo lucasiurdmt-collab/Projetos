@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sorteio Especial - Evento da Igreja</title>
+
+  <!-- Google Fonts: Bricolage Grotesque e DM Sans (Exatas do site de referência) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&display=swap" rel="stylesheet">
+
+  <!-- SheetJS para ler Excel caso online; fallback nativo para CSV e texto -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    /* Identidade Visual Extraída Diretamente de sites.universal.org/caminhadadoamor */
+    :root {
+      --roxo: #1d0d45;
+      --roxo-2: #2c1766;
+      --roxo-card: rgba(44, 23, 102, 0.88);
+      --lilas: #b8a4ff;
+      --laranja: #e2652a;
+      --laranja-2: #ff8a4c;
+      --laranja-sombra: #9b3b10;
+      --laranja-texto: #c0501a;
+      --creme: #fff4e8;
+      --branco: #ffffff;
+      
+      --font-display: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+      --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--roxo);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(184, 164, 255, 0.18), transparent 45%),
+        radial-gradient(circle at 85% 65%, rgba(226, 101, 42, 0.15), transparent 45%);
+      color: var(--branco);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow-x: hidden;
+      padding-bottom: 50px;
+      line-height: 1.5;
+    }
+
+    /* Canvas de Confetes */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Top Bar / Header */
+    .top-nav {
+      width: 100%;
+      max-width: 1100px;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--laranja);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      box-shadow: 0 4px 0 var(--laranja-sombra);
+    }
+
+    .brand-text {
+      font-family: var(--font-display);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      font-size: 1.15rem;
+      line-height: 1.1;
+    }
+
+    .brand-text span {
+      color: var(--lilas);
+      font-size: 0.85rem;
+      display: block;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      font-family: var(--font-body);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-nav {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--branco);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-nav:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: translateY(-2px);
+    }
+
+    /* Hero Section */
+    .hero-header {
+      text-align: center;
+      max-width: 800px;
+      padding: 20px 20px 10px;
+      position: relative;
+    }
+
+    .kicker {
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--laranja-2);
+      margin-bottom: 0.8rem;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 6vw, 4.4rem);
+      line-height: 0.95;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h1 em {
+      font-style: normal;
+      color: var(--laranja-2);
+    }
+
+    p.subtitle {
+      font-size: 1.15rem;
+      color: var(--creme);
+      opacity: 0.9;
+      max-width: 580px;
+      margin: 0 auto 15px;
+    }
+
+    /* Adesivos estilo Sticker (Caminhada do Amor) */
+    .sticker {
+      display: inline-block;
+      background: var(--branco);
+      color: var(--roxo);
+      font-family: var(--font-display);
+      font-weight: 800;
+      padding: 0.45rem 1rem;
+      border-radius: 1rem 1rem 1rem 0.2rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      font-size: 0.85rem;
+      transform: rotate(-2deg);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .sticker--lilas {
+      background: var(--lilas);
+      color: var(--roxo);
+      transform: rotate(3deg);
+      margin-left: 8px;
+    }
+
+    /* Faixa Marquee Diagonal */
+    .marquee {
+      width: 105vw;
+      background: var(--laranja);
+      color: var(--roxo);
+      overflow: hidden;
+      padding: 0.75rem 0;
+      transform: rotate(-1.5deg);
+      margin: 1.5rem 0 2rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .marquee__track {
+      display: flex;
+      width: max-content;
+      animation: marquee 25s linear infinite;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    @keyframes marquee {
+      to { transform: translateX(-50%); }
+    }
+
+    /* Container Principal */
+    .main-container {
+      width: 100%;
+      max-width: 900px;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      z-index: 2;
+    }
+
+    /* Card Telão de Sorteio */
+    .arena-card {
+      background: var(--roxo-card);
+      border: 1px solid rgba(184, 164, 255, 0.25);
+      border-radius: 28px;
+      padding: 40px 24px;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .arena-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 20%, rgba(255, 138, 76, 0.18), transparent 65%);
+      pointer-events: none;
+    }
+
+    .arena-label {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      color: var(--lilas);
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .roulette-display {
+      min-height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
+
+    .roulette-name {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: var(--branco);
+      text-shadow: 0 0 30px rgba(255, 138, 76, 0.6);
+      word-break: break-word;
+      transition: transform 0.08s;
+    }
+
+    .roulette-name.placeholder {
+      font-family: var(--font-body);
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: var(--lilas);
+      text-shadow: none;
+      text-transform: none;
+      opacity: 0.8;
+      max-width: 480px;
+      line-height: 1.4;
+    }
+
+    .winner-highlight {
+      animation: popWinner 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      color: #ffd166 !important;
+      text-shadow: 0 0 45px rgba(255, 209, 102, 0.95), 0 0 20px rgba(226, 101, 42, 0.8) !important;
+    }
+
+    @keyframes popWinner {
+      0% { transform: scale(0.6); opacity: 0; }
+      70% { transform: scale(1.12); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Botão Primário 3D da Caminhada do Amor */
+    .btn-universal {
+      display: inline-block;
+      background: var(--laranja);
+      color: var(--branco);
+      text-decoration: none;
+      font-family: var(--font-display);
+      font-weight: 800;
+      padding: 1.2rem 2.8rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 1.35rem;
+      text-align: center;
+      box-shadow: 0 6px 0 var(--laranja-sombra);
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+
+    .btn-universal:hover:not(:disabled) {
+      transform: translateY(-3px) rotate(-1deg);
+      box-shadow: 0 9px 0 var(--laranja-sombra);
+      background: var(--laranja-2);
+    }
+
+    .btn-universal:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 var(--laranja-sombra);
+    }
+
+    .btn-universal:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: 0 4px 0 #4a210f;
+      transform: none;
+    }
+
+    /* Painel de Upload / Dados */
+    .panel-card {
+      background: var(--roxo-card);
+      border: 1px solid rgba(184, 164, 255, 0.15);
+      border-radius: 24px;
+      padding: 26px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(12px);
+    }
+
+    .tab-pills {
+      display: flex;
+      gap: 8px;
+      background: rgba(29, 13, 69, 0.7);
+      padding: 6px;
+      border-radius: 999px;
+      margin-bottom: 20px;
+    }
+
+    .tab-pill {
+      flex: 1;
+      padding: 10px 18px;
+      background: transparent;
+      border: none;
+      border-radius: 999px;
+      color: var(--lilas);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-pill.active {
+      background: var(--laranja);
+      color: var(--branco);
+      box-shadow: 0 3px 0 var(--laranja-sombra);
+    }
+
+    /* Dropzone */
+    .dropzone {
+      border: 2px dashed rgba(184, 164, 255, 0.35);
+      border-radius: 18px;
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(29, 13, 69, 0.4);
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--laranja-2);
+      background: rgba(226, 101, 42, 0.08);
+      transform: scale(1.01);
+    }
+
+    .dropzone svg {
+      width: 46px;
+      height: 46px;
+      fill: var(--laranja-2);
+      margin-bottom: 12px;
+    }
+
+    .dropzone p {
+      font-size: 1.05rem;
+      color: var(--branco);
+      margin-bottom: 6px;
+    }
+
+    .dropzone span {
+      font-size: 0.85rem;
+      color: var(--lilas);
+    }
+
+    textarea {
+      width: 100%;
+      height: 125px;
+      background: rgba(29, 13, 69, 0.75);
+      border: 1px solid rgba(184, 164, 255, 0.25);
+      border-radius: 14px;
+      color: var(--branco);
+      padding: 14px;
+      font-size: 0.95rem;
+      font-family: var(--font-body);
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: 2px solid var(--laranja-2);
+      border-color: transparent;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.92rem;
+      color: var(--creme);
+      cursor: pointer;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--laranja);
+      cursor: pointer;
+    }
+
+    .pill-counter {
+      background: var(--laranja);
+      color: var(--branco);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.9rem;
+      letter-spacing: 0.03em;
+      box-shadow: 0 3px 0 var(--laranja-sombra);
+    }
+
+    /* Histórico */
+    .history-card {
+      background: var(--roxo-card);
+      border: 1px solid rgba(184, 164, 255, 0.2);
+      border-radius: 20px;
+      padding: 22px;
+    }
+
+    .history-header {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--laranja-2);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      margin-bottom: 14px;
+    }
+
+    .history-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(29, 13, 69, 0.6);
+      border: 1px solid rgba(184, 164, 255, 0.15);
+      padding: 12px 18px;
+      border-radius: 12px;
+      border-left: 5px solid var(--laranja);
+    }
+
+    .history-item strong {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .history-item span.time {
+      font-size: 0.85rem;
+      color: var(--lilas);
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Top Navigation -->
+  <header class="top-nav">
+    <div class="brand-badge">
+      <div class="brand-circle">H</div>
+      <div class="brand-text">
+        Evento Especial
+        <span>Sorteio do Habib's</span>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <button class="btn-nav" onclick="toggleFullScreen()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+        Tela Cheia
+      </button>
+      <button class="btn-nav" onclick="resetAll()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+        Reiniciar
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero Header -->
+  <section class="hero-header">
+    <p class="kicker">Edição Especial · Evento da Igreja</p>
+    <h1>Grande Sorteio<br><em>do Habib's</em></h1>
+    <p class="subtitle">Inscreva-se no canal, confirme sua presença e acompanhe ao vivo na tela!</p>
+    <div>
+      <span class="sticker">Ao Vivo no Telão</span>
+      <span class="sticker sticker--lilas">Boa Sorte!</span>
+    </div>
+  </section>
+
+  <!-- Faixa Marquee Estilo Caminhada do Amor -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track">
+      &nbsp;• SORTEIO DO HABIB'S • INSCREVA-SE NO CANAL • CONFIRME SEU NOME • EVENTO DA IGREJA • SORTEIO DO HABIB'S • INSCREVA-SE NO CANAL • CONFIRME SEU NOME • EVENTO DA IGREJA •
+    </div>
+  </div>
+
+  <main class="main-container">
+
+    <!-- Arena do Telão de Sorteio -->
+    <section class="arena-card">
+      <div class="arena-label">Sorteador Oficial</div>
+
+      <div class="roulette-display">
+        <div id="display-name" class="roulette-name placeholder">
+          Carregue a planilha ou cole os nomes abaixo para iniciar o sorteio
+        </div>
+      </div>
+
+      <button id="btn-draw" class="btn-universal" onclick="startDraw()" disabled>
+        🎲 SORTEAR AGORA!
+      </button>
+    </section>
+
+    <!-- Painel de Inserção de Participantes -->
+    <section class="panel-card">
+      <div class="tab-pills">
+        <button class="tab-pill active" onclick="switchTab('file')">📂 Planilha Excel (.xlsx) / CSV</button>
+        <button class="tab-pill" onclick="switchTab('paste')">✍️ Colar Nomes do Forms</button>
+      </div>
+
+      <div id="tab-file">
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+          <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+          <p><strong>Clique aqui</strong> ou arraste o arquivo gerado pelo Forms</p>
+          <span>Aceita planilhas (.xlsx, .xls) ou (.csv) baixadas do Google Planilhas</span>
+          <input type="file" id="file-input" accept=".xlsx, .xls, .csv, .txt" style="display: none;" onchange="handleFileSelect(event)">
+        </div>
+      </div>
+
+      <div id="tab-paste" style="display: none;">
+        <textarea id="paste-names" placeholder="Copie a coluna com os nomes no Excel e cole aqui (um participante por linha)..." oninput="parsePastedNames()"></textarea>
+      </div>
+
+      <div class="card-footer">
+        <label class="checkbox-container">
+          <input type="checkbox" id="remove-dups" checked onchange="updateParticipantList()">
+          Remover nomes repetidos automaticamente
+        </label>
+        <div class="pill-counter">
+          <span id="count-number">0</span> Participantes Prontos
+        </div>
+      </div>
+    </section>
+
+    <!-- Histórico de Ganhadores -->
+    <section class="history-card" id="history-container" style="display: none;">
+      <div class="history-header">🏆 Ganhadores Sorteados</div>
+      <ul class="history-list" id="history-list"></ul>
+    </section>
+
+  </main>
+
+  <script>
+    // --- Estado do Sorteio ---
+    let rawNames = [];
+    let participants = [];
+    let winners = [];
+    let isDrawing = false;
+
+    // --- Síntese de Áudio com Web Audio API ---
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) audioCtx = new AudioCtx();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function playTickSound() {
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320 + Math.random() * 90, ctx.currentTime);
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.04);
+      } catch (e) {}
+    }
+
+    function playVictorySound() {
+      try {
+        const ctx = getAudioContext();
+        const chords = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
+        chords.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          const startTime = ctx.currentTime + (idx * 0.085);
+          gain.gain.setValueAtTime(0.18, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.9);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.9);
+        });
+      } catch (e) {}
+    }
+
+    // --- Alternar Abas ---
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-pill').forEach(btn => btn.classList.remove('active'));
+      if (tab === 'file') {
+        document.querySelectorAll('.tab-pill')[0].classList.add('active');
+        document.getElementById('tab-file').style.display = 'block';
+        document.getElementById('tab-paste').style.display = 'none';
+      } else {
+        document.querySelectorAll('.tab-pill')[1].classList.add('active');
+        document.getElementById('tab-file').style.display = 'none';
+        document.getElementById('tab-paste').style.display = 'block';
+      }
+    }
+
+    // --- Drag & Drop ---
+    const dropzone = document.getElementById('dropzone');
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        processFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    function handleFileSelect(e) {
+      if (e.target.files.length > 0) {
+        processFile(e.target.files[0]);
+      }
+    }
+
+    function processFile(file) {
+      const fileName = file.name.toLowerCase();
+      const reader = new FileReader();
+
+      if (fileName.endsWith('.csv') || fileName.endsWith('.txt')) {
+        reader.onload = function(e) {
+          parseCsvContent(e.target.result);
+        };
+        reader.readAsText(file);
+      } else {
+        reader.onload = function(e) {
+          const data = new Uint8Array(e.target.result);
+          if (window.XLSX) {
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonRows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+            extractNamesFromRows(jsonRows);
+          } else {
+            alert('Não foi possível ler o Excel diretamente. Salve como CSV ou cole a lista na aba ao lado!');
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      }
+    }
+
+    function parseCsvContent(text) {
+      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l);
+      if (!lines.length) return;
+      const rows = lines.map(line => line.split(/[,;\t]/).map(c => c.replace(/^["']|["']$/g, '').trim()));
+      extractNamesFromRows(rows);
+    }
+
+    function extractNamesFromRows(rows) {
+      if (!rows.length) return;
+      let nameColIdx = 0;
+      const headers = rows[0].map(h => (h || '').toString().toLowerCase());
+      
+      const foundIdx = headers.findIndex(h => 
+        h.includes('nome') || h.includes('participante') || h.includes('name') || h.includes('completo')
+      );
+
+      if (foundIdx !== -1) {
+        nameColIdx = foundIdx;
+        rows = rows.slice(1);
+      }
+
+      rawNames = rows
+        .map(row => row[nameColIdx])
+        .filter(val => val && val.toString().trim().length > 1)
+        .map(val => val.toString().trim());
+
+      updateParticipantList();
+    }
+
+    function parsePastedNames() {
+      const text = document.getElementById('paste-names').value;
+      rawNames = text.split(/\r?\n/).map(n => n.trim()).filter(n => n.length > 1);
+      updateParticipantList();
+    }
+
+    function updateParticipantList() {
+      const removeDups = document.getElementById('remove-dups').checked;
+      let cleaned = rawNames.map(n => n.trim()).filter(n => n.length > 0);
+
+      if (removeDups) {
+        const seen = new Set();
+        cleaned = cleaned.filter(name => {
+          const lower = name.toLowerCase();
+          if (seen.has(lower)) return false;
+          seen.add(lower);
+          return true;
+        });
+      }
+
+      participants = cleaned;
+      document.getElementById('count-number').innerText = participants.length;
+      document.getElementById('btn-draw').disabled = participants.length === 0;
+
+      if (participants.length > 0 && !isDrawing && winners.length === 0) {
+        const display = document.getElementById('display-name');
+        display.classList.add('placeholder');
+        display.innerText = `Pronto! ${participants.length} participantes prontos para o sorteio.`;
+      }
+    }
+
+    // --- Animação do Sorteio ---
+    function startDraw() {
+      if (participants.length === 0 || isDrawing) return;
+      isDrawing = true;
+      document.getElementById('btn-draw').disabled = true;
+
+      const display = document.getElementById('display-name');
+      display.classList.remove('placeholder', 'winner-highlight');
+
+      let currentInterval = 40;
+      let elapsed = 0;
+      const totalDuration = 5000;
+      let lastIndex = -1;
+
+      const winnerIndex = Math.floor(Math.random() * participants.length);
+      const winnerName = participants[winnerIndex];
+
+      function step() {
+        let visualIdx;
+        do {
+          visualIdx = Math.floor(Math.random() * participants.length);
+        } while (visualIdx === lastIndex && participants.length > 1);
+        lastIndex = visualIdx;
+
+        display.innerText = participants[visualIdx];
+        playTickSound();
+
+        elapsed += currentInterval;
+
+        if (elapsed < totalDuration * 0.6) {
+          currentInterval = 50;
+        } else if (elapsed < totalDuration * 0.8) {
+          currentInterval += 25;
+        } else {
+          currentInterval += 60;
+        }
+
+        if (elapsed < totalDuration) {
+          setTimeout(step, currentInterval);
+        } else {
+          finishDraw(winnerName);
+        }
+      }
+
+      step();
+    }
+
+    function finishDraw(winnerName) {
+      const display = document.getElementById('display-name');
+      display.innerText = `👑 ${winnerName} 👑`;
+      display.classList.add('winner-highlight');
+
+      playVictorySound();
+      launchConfetti();
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      winners.unshift({ name: winnerName, time: timeStr });
+      renderHistory();
+
+      isDrawing = false;
+      document.getElementById('btn-draw').disabled = false;
+      document.getElementById('btn-draw').innerText = '🎲 SORTEAR OUTRO!';
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('history-container');
+      const list = document.getElementById('history-list');
+      container.style.display = 'block';
+      list.innerHTML = '';
+
+      winners.forEach((w, idx) => {
+        const li = document.createElement('li');
+        li.className = 'history-item';
+        li.innerHTML = `
+          <span>#${winners.length - idx} &nbsp; <strong>${w.name}</strong></span>
+          <span class="time">${w.time}</span>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    function resetAll() {
+      if (confirm('Deseja reiniciar a lista de nomes e o sorteio?')) {
+        rawNames = [];
+        participants = [];
+        winners = [];
+        document.getElementById('paste-names').value = '';
+        document.getElementById('file-input').value = '';
+        document.getElementById('count-number').innerText = '0';
+        document.getElementById('btn-draw').disabled = true;
+        document.getElementById('btn-draw').innerText = '🎲 SORTEAR AGORA!';
+        const display = document.getElementById('display-name');
+        display.className = 'roulette-name placeholder';
+        display.innerText = 'Carregue a planilha ou cole os nomes abaixo para iniciar o sorteio';
+        document.getElementById('history-container').style.display = 'none';
+      }
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    // --- Sistema de Confetes Nativo (Cores Oficiais) ---
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    let confettiParticles = [];
+    let animationFrame = null;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function launchConfetti() {
+      confettiParticles = [];
+      // Cores da Caminhada do Amor (laranja vibrante, lilás, branco, dourado)
+      const colors = ['#e2652a', '#ff8a4c', '#b8a4ff', '#ffffff', '#ffd166'];
+      for (let i = 0; i < 190; i++) {
+        confettiParticles.push({
+          x: canvas.width / 2,
+          y: canvas.height * 0.42,
+          r: Math.random() * 6 + 4,
+          dx: (Math.random() - 0.5) * 22,
+          dy: (Math.random() - 1.25) * 16,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10,
+          tiltAngle: 0,
+          tiltAngleIncremental: (Math.random() * 0.08) + 0.05,
+          opacity: 1
+        });
+      }
+
+      if (!animationFrame) {
+        animateConfetti();
+      }
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let aliveCount = 0;
+
+      confettiParticles.forEach(p => {
+        p.tiltAngle += p.tiltAngleIncremental;
+        p.y += (Math.cos(p.tiltAngle) + 3 + p.r / 2) / 2;
+        p.x += Math.sin(p.tiltAngle) * 2 + p.dx * 0.4;
+        p.dx *= 0.98;
+        p.tilt = Math.sin(p.tiltAngle) * 12;
+
+        if (p.y < canvas.height) {
+          aliveCount++;
+          ctx.beginPath();
+          ctx.lineWidth = p.r;
+          ctx.strokeStyle = p.color;
+          ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+          ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
+          ctx.stroke();
+        }
+      });
+
+      if (aliveCount > 0) {
+        animationFrame = requestAnimationFrame(animateConfetti);
+      } else {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = null;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+  </script>
+</body>
+</html>
