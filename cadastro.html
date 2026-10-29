@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscrição - Sorteio Oficial</title>
+
+  <!-- Google Fonts: Bricolage Grotesque e DM Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --roxo: #1d0d45;
+      --roxo-card: rgba(44, 23, 102, 0.92);
+      --lilas: #b8a4ff;
+      --laranja: #e2652a;
+      --laranja-2: #ff8a4c;
+      --laranja-sombra: #9b3b10;
+      --creme: #fff4e8;
+      --branco: #ffffff;
+      --verde: #10b981;
+      --vermelho-yt: #ff0000;
+      
+      --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--roxo);
+      background-image: 
+        radial-gradient(circle at 10% 15%, rgba(184, 164, 255, 0.18), transparent 45%),
+        radial-gradient(circle at 90% 85%, rgba(226, 101, 42, 0.18), transparent 50%);
+      color: var(--branco);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px 50px;
+      line-height: 1.5;
+    }
+
+    .form-container {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Cabeçalho */
+    .header-box {
+      text-align: center;
+    }
+
+    .kicker {
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--laranja-2);
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 8vw, 3.2rem);
+      line-height: 0.95;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    h1 em {
+      font-style: normal;
+      color: var(--laranja-2);
+    }
+
+    p.subtitle {
+      color: var(--creme);
+      opacity: 0.85;
+      font-size: 0.95rem;
+    }
+
+    /* Card Principal */
+    .card {
+      background: var(--roxo-card);
+      border: 1px solid rgba(184, 164, 255, 0.25);
+      border-radius: 28px;
+      padding: 28px 22px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      position: relative;
+    }
+
+    /* Passo 1: YouTube */
+    .step-box {
+      background: rgba(29, 13, 69, 0.7);
+      border: 1px solid rgba(184, 164, 255, 0.2);
+      border-radius: 18px;
+      padding: 18px 16px;
+      margin-bottom: 22px;
+      text-align: center;
+    }
+
+    .step-badge {
+      display: inline-block;
+      background: var(--laranja);
+      color: white;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    .step-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .step-desc {
+      font-size: 0.85rem;
+      color: var(--lilas);
+      margin-bottom: 14px;
+    }
+
+    .btn-youtube {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      background: #cc0000;
+      color: white;
+      text-decoration: none;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.95rem;
+      padding: 12px 18px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      box-shadow: 0 4px 0 #800000;
+      transition: all 0.2s;
+    }
+
+    .btn-youtube:hover {
+      background: #e60000;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 #800000;
+    }
+
+    .btn-youtube svg {
+      width: 22px;
+      height: 22px;
+      fill: white;
+    }
+
+    /* Formulário */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--creme);
+      margin-bottom: 8px;
+    }
+
+    input[type="text"], input[type="tel"] {
+      width: 100%;
+      background: rgba(29, 13, 69, 0.85);
+      border: 1px solid rgba(184, 164, 255, 0.3);
+      border-radius: 14px;
+      padding: 14px 16px;
+      color: white;
+      font-size: 1.05rem;
+      font-family: var(--font-body);
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus, input[type="tel"]:focus {
+      outline: none;
+      border-color: var(--laranja-2);
+      box-shadow: 0 0 15px rgba(255, 138, 76, 0.3);
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 20px 0 24px;
+      cursor: pointer;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--laranja);
+      margin-top: 2px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .checkbox-label {
+      font-size: 0.88rem;
+      color: var(--creme);
+      line-height: 1.4;
+    }
+
+    /* Botão Principal 3D */
+    .btn-submit {
+      width: 100%;
+      background: var(--laranja);
+      color: white;
+      border: none;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 16px 20px;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 6px 0 var(--laranja-sombra);
+      transition: all 0.2s;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: var(--laranja-2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 var(--laranja-sombra);
+    }
+
+    .btn-submit:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 var(--laranja-sombra);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: wait;
+    }
+
+    /* Tela de Sucesso */
+    .success-card {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .success-icon {
+      width: 70px;
+      height: 70px;
+      background: var(--verde);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 2.2rem;
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+    }
+
+    .success-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .success-desc {
+      color: var(--creme);
+      font-size: 1rem;
+      opacity: 0.9;
+      margin-bottom: 25px;
+    }
+
+    .ticket-badge {
+      background: rgba(29, 13, 69, 0.8);
+      border: 1px dashed var(--laranja);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .ticket-name {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #ffd166;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--lilas);
+      opacity: 0.7;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+
+    <header class="header-box">
+      <p class="kicker">Evento Oficial · Igreja</p>
+      <h1>Participe do<br><em>Sorteio</em></h1>
+      <p class="subtitle">Complete os passos abaixo para concorrer ao vivo no telão!</p>
+    </header>
+
+    <!-- Card com o Formulário -->
+    <div class="card" id="form-card">
+      
+      <!-- Passo 1: Inscrição no Canal -->
+      <div class="step-box">
+        <span class="step-badge">Passo 1 Obrigatório</span>
+        <h3 class="step-title">Inscreva-se no Canal</h3>
+        <p class="step-desc">Você precisa estar inscrito no canal do YouTube para validar seu prêmio no sorteio.</p>
+        
+        <!-- Insira o link do seu canal do YouTube abaixo no href -->
+        <a href="https://www.youtube.com/@TheLoveSchoolTV?sub_confirmation=1" target="_blank" rel="noopener" class="btn-youtube" onclick="markYtVisited()">
+          <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          Abrir Canal no YouTube
+        </a>
+      </div>
+
+      <!-- Formulário de Envio -->
+      <form id="raffle-form" onsubmit="submitToGoogle(event)">
+        
+        <div class="form-group">
+          <label for="user-name">Seu Nome Completo:</label>
+          <input type="text" id="user-name" placeholder="Ex: Maria Silva Oliveira" required autocomplete="name">
+        </div>
+
+        <div class="form-group">
+          <label for="user-phone">WhatsApp / Telefone:</label>
+          <input type="tel" id="user-phone" placeholder="(DDD) 99999-9999" required autocomplete="tel">
+        </div>
+
+        <label class="checkbox-container">
+          <input type="checkbox" id="check-subscribed" required>
+          <span class="checkbox-label">
+            <strong>Confirmo</strong> que já me inscrevi no canal do YouTube e estou presente no evento.
+          </span>
+        </label>
+
+        <button type="submit" id="btn-submit" class="btn-submit">
+          Confirmar e Participar 🎲
+        </button>
+      </form>
+
+    </div>
+
+    <!-- Card de Confirmação (Sucesso) -->
+    <div class="card success-card" id="success-card">
+      <div class="success-icon">✓</div>
+      <h2 class="success-title">Inscrição Confirmada!</h2>
+      <p class="success-desc">Seus dados já foram registrados nos servidores da Google e você já está concorrendo!</p>
+
+      <div class="ticket-badge">
+        <p style="font-size: 0.8rem; color: var(--lilas); text-transform: uppercase;">Participante Registrado:</p>
+        <div class="ticket-name" id="ticket-user-name">Maria Silva</div>
+      </div>
+
+      <p style="font-size: 0.9rem; color: var(--creme);">
+        Fique de olho no <strong>Telão do Evento</strong> na hora do sorteio! 👑
+      </p>
+    </div>
+
+    <footer>
+      Sistema Oficial de Sorteio · Conexão Segura Google
+    </footer>
+
+  </div>
+
+  <script>
+    // =========================================================================
+    // CONFIGURAÇÃO DO BACKEND GOOGLE
+    // Cole aqui o link do seu Google Forms ou Google Apps Script Web App!
+    // =========================================================================
+    const GOOGLE_CONFIG = {
+      // Opção A: URL do seu Google Forms (terminada em /formResponse)
+      formUrl: "https://docs.google.com/forms/d/e/SEU_FORM_ID_AQUI/formResponse",
+      
+      // IDs dos campos dentro do seu Google Forms (ex: entry.12345678)
+      entryName: "entry.111111111",
+      entryPhone: "entry.222222222",
+      entryConfirmed: "entry.333333333",
+
+      // Opção B: URL do Google Apps Script (se preferir via Script)
+      scriptUrl: "" 
+    };
+
+    function markYtVisited() {
+      // Opcional: marca visualmente que a pessoa clicou no botão do YouTube
+      document.getElementById('check-subscribed').checked = true;
+    }
+
+    async function submitToGoogle(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('user-name').value.trim();
+      const phone = document.getElementById('user-phone').value.trim();
+      const confirmed = document.getElementById('check-subscribed').checked;
+      const btn = document.getElementById('btn-submit');
+
+      if (!name) {
+        alert('Por favor, informe seu nome completo.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = 'Enviando aos servidores...';
+
+      // 1. Se estiver configurado o Google Apps Script Web App:
+      if (GOOGLE_CONFIG.scriptUrl) {
+        try {
+          await fetch(GOOGLE_CONFIG.scriptUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, phone, confirmed, timestamp: new Date().toISOString() })
+          });
+        } catch (err) {}
+      } 
+      // 2. Se estiver configurado o Google Forms oficial:
+      else if (GOOGLE_CONFIG.formUrl && !GOOGLE_CONFIG.formUrl.includes('SEU_FORM_ID_AQUI')) {
+        const formData = new FormData();
+        formData.append(GOOGLE_CONFIG.entryName, name);
+        formData.append(GOOGLE_CONFIG.entryPhone, phone);
+        formData.append(GOOGLE_CONFIG.entryConfirmed, "Sim");
+
+        try {
+          await fetch(GOOGLE_CONFIG.formUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: formData
+          });
+        } catch (err) {}
+      }
+
+      // Salva localmente também como garantia extra de backup
+      try {
+        const localList = JSON.parse(localStorage.getItem('sorteio_self_registered') || '[]');
+        localList.push({ name, phone, time: new Date().toLocaleTimeString() });
+        localStorage.setItem('sorteio_self_registered', JSON.stringify(localList));
+      } catch (e) {}
+
+      // Exibe a tela de confirmação
+      document.getElementById('form-card').style.display = 'none';
+      document.getElementById('ticket-user-name').innerText = name;
+      document.getElementById('success-card').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

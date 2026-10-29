@@ -490,23 +490,44 @@
     </div>
   </header>
 
-  <!-- Banner do Telão para vMix -->
-  <div class="vmix-banner" style="width: 100%; max-width: 1050px;">
-    <div class="vmix-info">
-      <h4>🖥️ Telão de Exibição / vMix (LED)</h4>
-      <p>Abra o telão no projetor/painel de LED ou envie como <strong>Web Browser Input no vMix</strong>.</p>
+  <!-- Banners de Acesso Rápido -->
+  <div style="width: 100%; max-width: 1050px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 25px;">
+    
+    <!-- Banner 1: Formulário de Cadastro do Público -->
+    <div class="vmix-banner" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(44, 23, 102, 0.8) 100%); border-color: var(--verde);">
+      <div class="vmix-info">
+        <h4 style="color: #34d399;">📱 Formulário de Inscrição Oficial (Para o Público / QR Code)</h4>
+        <p>Tela bonita para o público abrir no celular pelo QR Code, se inscrever no YouTube e preencher o nome.</p>
+      </div>
+      <div class="vmix-actions">
+        <a href="cadastro.html" target="_blank" class="btn-action" style="background: var(--verde); border-color: var(--verde); box-shadow: 0 3px 0 #065f46; font-weight: 800;">
+          📱 ABRIR CADASTRO ↗
+        </a>
+        <button class="btn-action" onclick="copyCadastroLink()">
+          📋 Copiar Link para QR Code
+        </button>
+      </div>
     </div>
-    <div class="vmix-actions">
-      <a href="telao.html" target="_blank" class="btn-action primary" style="font-weight: 800;">
-        🖥️ ABRIR TELA DO TELÃO ↗
-      </a>
-      <button class="btn-action" onclick="copyTelaoLink(false)">
-        📋 Copiar Link (Fundo Roxo)
-      </button>
-      <button class="btn-action" onclick="copyTelaoLink(true)" title="Fundo transparente para usar sobre a câmera no vMix">
-        ✨ Copiar Link (Transparente)
-      </button>
+
+    <!-- Banner 2: Telão para vMix / LED -->
+    <div class="vmix-banner">
+      <div class="vmix-info">
+        <h4>🖥️ Telão de Exibição / vMix (LED)</h4>
+        <p>Abra o telão no projetor/painel de LED ou envie como <strong>Web Browser Input no vMix</strong>.</p>
+      </div>
+      <div class="vmix-actions">
+        <a href="telao.html" target="_blank" class="btn-action primary" style="font-weight: 800;">
+          🖥️ ABRIR TELA DO TELÃO ↗
+        </a>
+        <button class="btn-action" onclick="copyTelaoLink(false)">
+          📋 Copiar Link (Fundo Roxo)
+        </button>
+        <button class="btn-action" onclick="copyTelaoLink(true)" title="Fundo transparente para usar sobre a câmera no vMix">
+          ✨ Copiar Link (Transparente)
+        </button>
+      </div>
     </div>
+
   </div>
 
   <main class="main-grid">
@@ -625,6 +646,16 @@
 
     setInterval(checkTelao, 3000);
     checkTelao();
+
+    // --- Copiar Link do Cadastro (para QR Code) ---
+    function copyCadastroLink() {
+      const url = new URL('cadastro.html', window.location.href).href;
+      navigator.clipboard.writeText(url).then(() => {
+        alert('📋 Link de Inscrição copiado com sucesso!\n\nUse para gerar o QR Code no telão:\n' + url);
+      }).catch(() => {
+        prompt('Copie o link do cadastro abaixo:', url);
+      });
+    }
 
     // --- Copiar Link Direto para o vMix ---
     function copyTelaoLink(transparent = false) {
