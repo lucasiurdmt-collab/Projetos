@@ -410,20 +410,13 @@
 
   <script>
     // =========================================================================
-    // CONFIGURAÇÃO DO BACKEND GOOGLE
-    // Quando você criar seu Google Forms, colocamos a URL dele aqui!
+    // CONFIGURAÇÃO DO BACKEND GOOGLE CONECTADA AO SEU GOOGLE FORMS OFICIAL:
+    // Link: https://forms.gle/ZcW5RnuNRAi4W8Rb7 (Sorteio)
     // =========================================================================
     const GOOGLE_CONFIG = {
-      // URL do formulário Google (formResponse)
-      formUrl: "https://docs.google.com/forms/d/e/SEU_FORM_ID_AQUI/formResponse",
-      
-      // IDs dos campos dentro do seu Google Forms (ex: entry.12345678)
-      entryName: "entry.111111111",
-      entryPhone: "entry.222222222",
-      entryConfirmed: "entry.333333333",
-
-      // Alternativa: URL do Google Apps Script (se preferir)
-      scriptUrl: "" 
+      formUrl: "https://docs.google.com/forms/d/e/1FAIpQLScJ3Cy9fncGCjtsqMXxbfHV1z7RVVAjHEq-GrJ4k75wce4YzA/formResponse",
+      entryName: "entry.1567183660", // Pergunta: "Nome Completo"
+      entryPhone: "entry.1653771938"  // Pergunta: "Whatsapp"
     };
 
     // =========================================================================
@@ -501,23 +494,11 @@
       // Gera código de bilhete único para o participante
       const randomTicket = '#TICKET-' + Math.floor(100000 + Math.random() * 900000);
 
-      // 1. Se estiver configurado o Google Apps Script Web App:
-      if (GOOGLE_CONFIG.scriptUrl) {
-        try {
-          await fetch(GOOGLE_CONFIG.scriptUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, phone, ticket: randomTicket, confirmed, timestamp: new Date().toISOString() })
-          });
-        } catch (err) {}
-      } 
-      // 2. Se estiver configurado o Google Forms oficial:
-      else if (GOOGLE_CONFIG.formUrl && !GOOGLE_CONFIG.formUrl.includes('SEU_FORM_ID_AQUI')) {
+      // Envia diretamente para o seu Google Forms oficial
+      if (GOOGLE_CONFIG.formUrl) {
         const formData = new FormData();
         formData.append(GOOGLE_CONFIG.entryName, name);
         formData.append(GOOGLE_CONFIG.entryPhone, phone);
-        formData.append(GOOGLE_CONFIG.entryConfirmed, "Sim");
 
         try {
           await fetch(GOOGLE_CONFIG.formUrl, {
@@ -525,7 +506,9 @@
             mode: 'no-cors',
             body: formData
           });
-        } catch (err) {}
+        } catch (err) {
+          console.warn('Envio em segundo plano concluído:', err);
+        }
       }
 
       // 3. GRAVA A TRAVA DE APARELHO (Bloqueia reenvio no celular)
