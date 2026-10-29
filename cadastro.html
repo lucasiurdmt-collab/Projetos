@@ -173,6 +173,53 @@
       fill: white;
     }
 
+    .btn-youtube.completed {
+      background: var(--verde) !important;
+      box-shadow: 0 4px 0 #065f46 !important;
+    }
+
+    /* Etapa 2 Bloqueada até visitar o YouTube */
+    .step-2-section {
+      transition: all 0.3s ease;
+    }
+
+    .step-2-section.locked {
+      opacity: 0.42;
+      pointer-events: none;
+      filter: grayscale(0.6);
+      user-select: none;
+    }
+
+    .lock-notice {
+      background: rgba(226, 101, 42, 0.16);
+      border: 1px dashed var(--laranja);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: #ffd166;
+    }
+
+    .lock-notice.unlocked {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--verde);
+      color: #34d399;
+    }
+
+    .rule-notice {
+      background: rgba(29, 13, 69, 0.85);
+      border-left: 4px solid var(--laranja);
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin: 18px 0 20px;
+      font-size: 0.82rem;
+      color: var(--creme);
+      line-height: 1.4;
+    }
+
     /* Formulário */
     .form-group {
       margin-bottom: 18px;
@@ -345,36 +392,48 @@
           <span style="font-size: 0.8rem; opacity: 0.85;">com o Bispo Wagner Negrão e Vânia Negrão</span>
         </p>
         
-        <a href="https://www.youtube.com/@VencendooDivorcio?sub_confirmation=1" target="_blank" rel="noopener" class="btn-youtube" onclick="markYtVisited()">
+        <a id="btn-yt" href="https://www.youtube.com/@VencendooDivorcio?sub_confirmation=1" target="_blank" rel="noopener" class="btn-youtube" onclick="markYtVisited()">
           <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-          Inscrever-se no Canal Vencendo o Divórcio
+          <span id="btn-yt-text">Inscrever-se no Canal Vencendo o Divórcio</span>
         </a>
       </div>
 
-      <!-- Formulário de Envio -->
-      <form id="raffle-form" onsubmit="submitToGoogle(event)">
-        
-        <div class="form-group">
-          <label for="user-name">Seu Nome Completo:</label>
-          <input type="text" id="user-name" placeholder="Ex: Maria Silva Oliveira" required autocomplete="name">
-        </div>
+      <!-- Aviso de Bloqueio da Etapa 2 -->
+      <div class="lock-notice" id="lock-notice">
+        <span>🔒</span>
+        <span><strong>Passo 2 Bloqueado:</strong> Toque no botão vermelho acima para abrir o YouTube primeiro!</span>
+      </div>
 
-        <div class="form-group">
-          <label for="user-phone">WhatsApp / Telefone:</label>
-          <input type="tel" id="user-phone" placeholder="(DDD) 99999-9999" required autocomplete="tel">
-        </div>
+      <!-- Passo 2: Formulário Protegido -->
+      <div class="step-2-section locked" id="step-2-section">
+        <form id="raffle-form" onsubmit="submitToGoogle(event)">
+          
+          <div class="form-group">
+            <label for="user-name">Seu Nome Completo:</label>
+            <input type="text" id="user-name" placeholder="Ex: Maria Silva Oliveira" required autocomplete="name" disabled>
+          </div>
 
-        <label class="checkbox-container">
-          <input type="checkbox" id="check-subscribed" required>
-          <span class="checkbox-label">
-            <strong>Confirmo</strong> que já me inscrevi no canal <strong>Vencendo o Divórcio</strong> e estou presente no evento.
-          </span>
-        </label>
+          <div class="form-group">
+            <label for="user-phone">WhatsApp / Telefone:</label>
+            <input type="tel" id="user-phone" placeholder="(DDD) 99999-9999" required autocomplete="tel" disabled>
+          </div>
 
-        <button type="submit" id="btn-submit" class="btn-submit">
-          Confirmar e Participar 🎲
-        </button>
-      </form>
+          <label class="checkbox-container">
+            <input type="checkbox" id="check-subscribed" required disabled>
+            <span class="checkbox-label">
+              <strong>Confirmo</strong> que me inscrevi no canal <strong>Vencendo o Divórcio</strong> e estou presente no evento.
+            </span>
+          </label>
+
+          <div class="rule-notice">
+            <strong>⚠️ Regra Oficial:</strong> Se você for o sorteado no telão, deverá subir ao palco com seu celular e <strong>mostrar sua inscrição ativa no canal</strong> para validar o prêmio!
+          </div>
+
+          <button type="submit" id="btn-submit" class="btn-submit" disabled>
+            Confirmar e Participar 🎲
+          </button>
+        </form>
+      </div>
 
     </div>
 
@@ -465,12 +524,44 @@
       document.getElementById('success-card').style.display = 'block';
     }
 
+    let hasVisitedYt = false;
+
     function markYtVisited() {
+      hasVisitedYt = true;
+
+      // 1. Atualiza visual do botão do YouTube
+      const btn = document.getElementById('btn-yt');
+      btn.classList.add('completed');
+      btn.innerHTML = `
+        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        ✓ Canal Aberto! Conclua o cadastro abaixo
+      `;
+
+      // 2. Desbloqueia o Passo 2
+      const step2 = document.getElementById('step-2-section');
+      step2.classList.remove('locked');
+
+      const notice = document.getElementById('lock-notice');
+      notice.classList.add('unlocked');
+      notice.innerHTML = '<span>✓</span> <span><strong>Passo 1 concluído!</strong> Agora preencha seus dados para emitir seu bilhete:</span>';
+
+      // 3. Habilita os inputs
+      document.getElementById('user-name').disabled = false;
+      document.getElementById('user-phone').disabled = false;
+      document.getElementById('check-subscribed').disabled = false;
       document.getElementById('check-subscribed').checked = true;
+      document.getElementById('btn-submit').disabled = false;
     }
 
     async function submitToGoogle(e) {
       e.preventDefault();
+
+      // Checagem obrigatória: clicou no YouTube?
+      if (!hasVisitedYt) {
+        alert('⚠️ ATENÇÃO: É obrigatório clicar no botão vermelho acima para abrir e se inscrever no canal Vencendo o Divórcio antes de continuar!');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
 
       // Checagem de segurança anti-fraude no aparelho
       const existing = getDeviceRegistration();
