@@ -1,19 +1,26 @@
-# Sorteio do Habib's - Evento da Igreja 🎉
+# Sistema de Sorteio ao Vivo (vMix & Painel de LED) 🎉
 
-Sistema web interativo para realização de sorteios em eventos da igreja (com integração visual e estética inspirada na **Caminhada do Amor / The Love Walk**).
+Sistema profissional dividido em **Painel da Produção (Backstage)** e **Telão de Exibição (vMix / LED)** com estética baseada na **Caminhada do Amor / The Love Walk**.
 
-## 🚀 Funcionalidades
-- **Importação Direta de Dados:**
-  - Suporte a arrastar e soltar planilhas Excel (`.xlsx`, `.xls`) ou `.csv` baixadas do Google Forms.
-  - Aba de colagem rápida (copiar e colar a coluna de nomes do Planilhas/Excel).
-  - Remoção automática de nomes repetidos / cadastros duplicados.
-- **Experiência Visual de Telão (Projetor / TV):**
-  - Efeito dinâmico de roleta embaralhando os participantes em alta velocidade com desaceleração gradual de suspense.
-  - Sons sintetizados em tempo real via Web Audio API (som de rotação + fanfarra da vitória) sem depender de arquivos externos.
-  - Chuva de confetes customizada em canvas nativo nas cores oficiais do evento.
-  - Modo **Tela Cheia (F11)** com um clique.
-  - Histórico de participantes sorteados.
+---
 
-## 🌐 Como Acessar no GitHub Pages
-Após ativar o GitHub Pages nas configurações do repositório (`Settings > Pages > Branch: main > Save`), o sorteador ficará acessível em:
-👉 `https://lucasiurdmt-collab.github.io/Projetos/`
+## 🔗 Links Oficiais no GitHub Pages
+
+1. **Painel da Produção (Equipe / Backstage):**
+   👉 `https://lucasiurdmt-collab.github.io/Projetos/`
+   - Onde a equipe carrega o Excel (.xlsx) ou CSV do Google Forms.
+   - Opção para remover nomes duplicados.
+   - Prévia dos participantes carregados.
+   - Botão mestre: **"DISPARAR SORTEIO NO TELÃO!"**
+   - Indicador de status em tempo real (mostra se o vMix/Telão está conectado).
+
+2. **Telão de Exibição (vMix / Painel de LED):**
+   👉 `https://lucasiurdmt-collab.github.io/Projetos/telao.html`
+   - Visual limpo, cinematográfico, apenas o sorteio e animações.
+   - Adicione no vMix como **Add Input > Web Browser**.
+   - Dica: Adicione `?transparent=true` no final da URL (`telao.html?transparent=true`) se quiser usar como overlay sobre câmeras no vMix!
+
+---
+
+## ⚡ Como funciona a comunicação em tempo real
+A comunicação entre o painel da equipe e o telão funciona **em tempo real** no navegador utilizando as APIs nativas `BroadcastChannel` e `localStorage`. Quando a equipe clica em **"Disparar Sorteio"**, o telão no vMix gira a roleta, toca o suspense e revela o vencedor com chuva de confetes e fanfarra!

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telão vMix / LED - Sorteio</title>
+
+  <!-- Google Fonts: Bricolage Grotesque e DM Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --roxo: #1d0d45;
+      --roxo-card: rgba(44, 23, 102, 0.9);
+      --lilas: #b8a4ff;
+      --laranja: #e2652a;
+      --laranja-2: #ff8a4c;
+      --laranja-sombra: #9b3b10;
+      --creme: #fff4e8;
+      --branco: #ffffff;
+      --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--roxo);
+      background-image: 
+        radial-gradient(circle at 50% 30%, rgba(184, 164, 255, 0.22), transparent 55%),
+        radial-gradient(circle at 80% 75%, rgba(226, 101, 42, 0.2), transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(44, 23, 102, 0.8), transparent 60%);
+      color: var(--branco);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Opcional para vMix (Fundo transparente via parâmetro ?transparent=true) */
+    body.is-transparent {
+      background: transparent !important;
+    }
+
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Topo do Telão */
+    header {
+      width: 100%;
+      padding: 30px 40px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      z-index: 2;
+    }
+
+    .kicker {
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      font-size: clamp(0.85rem, 1.5vw, 1.2rem);
+      font-weight: 800;
+      color: var(--laranja-2);
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(3.2rem, 7.5vw, 6.5rem);
+      line-height: 0.9;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+    }
+
+    h1 em {
+      font-style: normal;
+      color: var(--laranja-2);
+    }
+
+    .stickers-row {
+      margin-top: 15px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .sticker {
+      background: var(--branco);
+      color: var(--roxo);
+      font-family: var(--font-display);
+      font-weight: 800;
+      padding: 0.5rem 1.4rem;
+      border-radius: 1.2rem 1.2rem 1.2rem 0.2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      font-size: clamp(0.85rem, 1.2vw, 1.1rem);
+      transform: rotate(-2deg);
+      text-transform: uppercase;
+    }
+
+    .sticker--lilas {
+      background: var(--lilas);
+      transform: rotate(3deg);
+    }
+
+    /* Faixa Marquee */
+    .marquee {
+      width: 105vw;
+      background: var(--laranja);
+      color: var(--roxo);
+      overflow: hidden;
+      padding: 0.8rem 0;
+      transform: rotate(-1.2deg);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+      z-index: 2;
+    }
+
+    .marquee__track {
+      display: flex;
+      width: max-content;
+      animation: marquee 25s linear infinite;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(1.1rem, 2vw, 1.6rem);
+      white-space: nowrap;
+    }
+
+    @keyframes marquee {
+      to { transform: translateX(-50%); }
+    }
+
+    /* Arena Central do Telão */
+    .stage-center {
+      width: 90vw;
+      max-width: 1200px;
+      margin: auto 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .stage-card {
+      width: 100%;
+      background: var(--roxo-card);
+      border: 2px solid rgba(184, 164, 255, 0.3);
+      border-radius: 36px;
+      padding: clamp(40px, 6vw, 70px) 30px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      position: relative;
+    }
+
+    .stage-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 36px;
+      background: radial-gradient(circle at 50% 30%, rgba(255, 138, 76, 0.22), transparent 70%);
+      pointer-events: none;
+    }
+
+    .status-badge {
+      font-size: clamp(0.85rem, 1.2vw, 1.1rem);
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      color: var(--lilas);
+      font-weight: 800;
+      margin-bottom: 25px;
+    }
+
+    .roulette-name {
+      font-family: var(--font-display);
+      font-size: clamp(2.6rem, 7vw, 5.5rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: var(--branco);
+      text-shadow: 0 0 35px rgba(255, 138, 76, 0.6);
+      word-break: break-word;
+      transition: transform 0.08s;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .roulette-name.waiting {
+      font-family: var(--font-body);
+      font-size: clamp(1.4rem, 2.8vw, 2.4rem);
+      font-weight: 500;
+      color: var(--lilas);
+      text-shadow: none;
+      text-transform: none;
+      opacity: 0.85;
+    }
+
+    .winner-highlight {
+      animation: popWinner 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      color: #ffd166 !important;
+      text-shadow: 0 0 50px rgba(255, 209, 102, 1), 0 0 25px rgba(226, 101, 42, 0.9) !important;
+    }
+
+    @keyframes popWinner {
+      0% { transform: scale(0.5); opacity: 0; }
+      70% { transform: scale(1.15); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Rodapé discreto */
+    footer {
+      width: 100%;
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--lilas);
+      opacity: 0.7;
+      z-index: 2;
+    }
+
+    .connection-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <header>
+    <p class="kicker">Edição Especial · Evento da Igreja</p>
+    <h1>Grande <em>Sorteio</em></h1>
+    <div class="stickers-row">
+      <span class="sticker">Ao Vivo</span>
+      <span class="sticker sticker--lilas" id="participant-count-badge">Aguardando Lista</span>
+    </div>
+  </header>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track">
+      &nbsp;• GRANDE SORTEIO • EVENTO DA IGREJA • ACOMPANHE AO VIVO • BOA SORTE A TODOS • GRANDE SORTEIO • EVENTO DA IGREJA • ACOMPANHE AO VIVO • BOA SORTE A TODOS •
+    </div>
+  </div>
+
+  <main class="stage-center">
+    <div class="stage-card">
+      <div class="status-badge" id="screen-status">Painel de Exibição</div>
+      <div id="display-name" class="roulette-name waiting">
+        Aguardando início pela produção...
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="connection-pill">
+      <span class="dot"></span> Sinal vMix / LED Conectado
+    </div>
+    <div id="footer-count">0 participantes</div>
+  </footer>
+
+  <script>
+    // --- Suporte a fundo transparente (?transparent=true) para overlays no vMix ---
+    if (new URLSearchParams(window.location.search).get('transparent') === 'true') {
+      document.body.classList.add('is-transparent');
+    }
+
+    // --- Comunicação em Tempo Real com a Mesa de Controle (Backstage) ---
+    const channel = new BroadcastChannel('sorteio_channel');
+    let participants = [];
+    let isDrawing = false;
+
+    // Responde ao backstage que o telão está aberto
+    function notifyOnline() {
+      channel.postMessage({ type: 'SCREEN_ONLINE' });
+    }
+
+    // --- Web Audio API (Sons de Suspense e Vitória) ---
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) audioCtx = new AudioCtx();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function playTickSound() {
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(340 + Math.random() * 80, ctx.currentTime);
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.04);
+      } catch (e) {}
+    }
+
+    function playVictorySound() {
+      try {
+        const ctx = getAudioContext();
+        const chords = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
+        chords.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          const startTime = ctx.currentTime + (idx * 0.085);
+          gain.gain.setValueAtTime(0.18, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.9);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.9);
+        });
+      } catch (e) {}
+    }
+
+    // --- Ouvir Comandos da Produção ---
+    channel.onmessage = (event) => {
+      const data = event.data;
+      if (!data) return;
+
+      if (data.type === 'PING') {
+        notifyOnline();
+      } else if (data.type === 'UPDATE_PARTICIPANTS') {
+        participants = data.participants || [];
+        updateStatus();
+      } else if (data.type === 'START_DRAW') {
+        participants = data.participants || participants;
+        const winnerName = data.winnerName;
+        runDrawAnimation(winnerName);
+      } else if (data.type === 'RESET') {
+        resetScreen();
+      }
+    };
+
+    // Também escuta via localStorage para garantir sincronismo total
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'sorteio_cmd' && e.newValue) {
+        try {
+          const data = JSON.parse(e.newValue);
+          if (data.type === 'START_DRAW' && !isDrawing) {
+            participants = data.participants || participants;
+            runDrawAnimation(data.winnerName);
+          } else if (data.type === 'UPDATE_PARTICIPANTS') {
+            participants = data.participants || [];
+            updateStatus();
+          } else if (data.type === 'RESET') {
+            resetScreen();
+          }
+        } catch (err) {}
+      }
+    });
+
+    function updateStatus() {
+      const countEl = document.getElementById('participant-count-badge');
+      const footerEl = document.getElementById('footer-count');
+      const display = document.getElementById('display-name');
+
+      if (participants.length > 0) {
+        countEl.innerText = `${participants.length} Participantes`;
+        footerEl.innerText = `${participants.length} pessoas concorrendo`;
+        if (!isDrawing && display.classList.contains('waiting')) {
+          display.innerText = 'Pronto para o Sorteio!';
+        }
+      } else {
+        countEl.innerText = 'Aguardando Lista';
+        footerEl.innerText = '0 participantes';
+        display.classList.add('waiting');
+        display.innerText = 'Aguardando início pela produção...';
+      }
+    }
+
+    function runDrawAnimation(winnerName) {
+      if (!participants.length || isDrawing) return;
+      isDrawing = true;
+
+      const display = document.getElementById('display-name');
+      const status = document.getElementById('screen-status');
+      display.classList.remove('waiting', 'winner-highlight');
+      status.innerText = 'Sorteando...';
+
+      let currentInterval = 40;
+      let elapsed = 0;
+      const totalDuration = 5200;
+      let lastIndex = -1;
+
+      function step() {
+        let visualIdx;
+        do {
+          visualIdx = Math.floor(Math.random() * participants.length);
+        } while (visualIdx === lastIndex && participants.length > 1);
+        lastIndex = visualIdx;
+
+        display.innerText = participants[visualIdx];
+        playTickSound();
+
+        elapsed += currentInterval;
+
+        if (elapsed < totalDuration * 0.6) {
+          currentInterval = 50;
+        } else if (elapsed < totalDuration * 0.8) {
+          currentInterval += 25;
+        } else {
+          currentInterval += 65;
+        }
+
+        if (elapsed < totalDuration) {
+          setTimeout(step, currentInterval);
+        } else {
+          finishWinner(winnerName);
+        }
+      }
+
+      step();
+    }
+
+    function finishWinner(winnerName) {
+      const display = document.getElementById('display-name');
+      const status = document.getElementById('screen-status');
+      display.innerText = `👑 ${winnerName} 👑`;
+      display.classList.add('winner-highlight');
+      status.innerText = '🎉 VENCEDOR SORTEADO!';
+
+      playVictorySound();
+      launchConfetti();
+      isDrawing = false;
+    }
+
+    function resetScreen() {
+      const display = document.getElementById('display-name');
+      const status = document.getElementById('screen-status');
+      display.className = 'roulette-name waiting';
+      display.innerText = participants.length ? 'Pronto para o Sorteio!' : 'Aguardando início pela produção...';
+      status.innerText = 'Painel de Exibição';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Inicialização
+    notifyOnline();
+    setInterval(notifyOnline, 3000);
+
+    // Carrega do localStorage inicial se já tiver dados salvos
+    const cached = localStorage.getItem('sorteio_participants');
+    if (cached) {
+      try {
+        participants = JSON.parse(cached);
+        updateStatus();
+      } catch (e) {}
+    }
+
+    // --- Sistema de Confetes ---
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    let confettiParticles = [];
+    let animationFrame = null;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function launchConfetti() {
+      confettiParticles = [];
+      const colors = ['#e2652a', '#ff8a4c', '#b8a4ff', '#ffffff', '#ffd166'];
+      for (let i = 0; i < 220; i++) {
+        confettiParticles.push({
+          x: canvas.width / 2,
+          y: canvas.height * 0.45,
+          r: Math.random() * 7 + 4,
+          dx: (Math.random() - 0.5) * 24,
+          dy: (Math.random() - 1.25) * 18,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10,
+          tiltAngle: 0,
+          tiltAngleIncremental: (Math.random() * 0.08) + 0.05,
+          opacity: 1
+        });
+      }
+
+      if (!animationFrame) {
+        animateConfetti();
+      }
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let aliveCount = 0;
+
+      confettiParticles.forEach(p => {
+        p.tiltAngle += p.tiltAngleIncremental;
+        p.y += (Math.cos(p.tiltAngle) + 3 + p.r / 2) / 2;
+        p.x += Math.sin(p.tiltAngle) * 2 + p.dx * 0.4;
+        p.dx *= 0.98;
+        p.tilt = Math.sin(p.tiltAngle) * 12;
+
+        if (p.y < canvas.height) {
+          aliveCount++;
+          ctx.beginPath();
+          ctx.lineWidth = p.r;
+          ctx.strokeStyle = p.color;
+          ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+          ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
+          ctx.stroke();
+        }
+      });
+
+      if (aliveCount > 0) {
+        animationFrame = requestAnimationFrame(animateConfetti);
+      } else {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = null;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+  </script>
+</body>
+</html>
