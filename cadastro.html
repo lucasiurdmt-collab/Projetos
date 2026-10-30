@@ -479,8 +479,18 @@
       </div>
 
       <p style="font-size: 0.9rem; color: var(--creme);">
-        Fique de olho no <strong>Telão do Evento</strong> na hora do sorteio! 👑
+        Fique de olho no <strong>Telão do Evento</strong> na hora do sorteio!
       </p>
+    </div>
+
+    <!-- Card de Inscrições Encerradas -->
+    <div class="card closed-card" id="closed-card" style="display: none; text-align: center; padding: 40px 20px;">
+      <div style="width: 70px; height: 70px; background: var(--laranja); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2rem; box-shadow: 0 0 25px rgba(226, 101, 42, 0.5);">🔒</div>
+      <h2 style="font-family: var(--font-display); font-size: 1.9rem; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; color: var(--laranja-2);">Inscrições Encerradas</h2>
+      <p style="color: var(--creme); font-size: 1.05rem; opacity: 0.9; margin-bottom: 22px;">As inscrições para o grande sorteio foram finalizadas pela produção do evento.</p>
+      <div style="background: rgba(29, 13, 69, 0.85); border: 1px dashed var(--lilas); border-radius: 14px; padding: 16px;">
+        <p style="color: var(--lilas); font-size: 0.95rem; font-weight: 600;">Fique atento ao <strong>Telão do Evento</strong>, o sorteio começará em instantes!</p>
+      </div>
     </div>
 
     <footer>
@@ -527,8 +537,92 @@
       document.cookie = `sorteio_reg=${encodeURIComponent(JSON.stringify(data))}; expires=${expires}; path=/; SameSite=Lax`;
     }
 
-    // Ao carregar a página, checa se este celular já se cadastrou
+    // =========================================================================
+    // GERADOR DE BILHETE / TICKET DETERMINÍSTICO
+    // Gera exatamente o mesmo ticket na tela do participante e na mesa de controle!
+    // =========================================================================
+    function generateTicket(name, phone) {
+      const cleanPhone = (phone || '').replace(/\D/g, '');
+      const words = (name || '').trim().split(/\s+/).filter(w => w.length > 0);
+      let initials = 'TK';
+      if (words.length >= 2) {
+        initials = (words[0][0] + words[words.length - 1][0]).toUpperCase();
+      } else if (words.length === 1) {
+        initials = (words[0].slice(0, 2)).toUpperCase();
+      }
+      let numPart = '';
+      if (cleanPhone.length >= 4) {
+        numPart = cleanPhone.slice(-4);
+      } else {
+        let hash = 0;
+        const s = (name + cleanPhone).toLowerCase();
+        for (let i = 0; i < s.length; i++) hash = ((hash << 5) - hash) + s.charCodeAt(i);
+        numPart = String(Math.abs(hash) % 9000 + 1000);
+      }
+      return `#TKT-${initials}${numPart}`;
+    }
+
+    // =========================================================================
+    // CONTROLE DE STATUS DAS INSCRIÇÕES (ABERTAS / ENCERRADAS)
+    // =========================================================================
+    let inscricoesAbertas = true;
+    const channel = new BroadcastChannel('sorteio_channel');
+
+    channel.onmessage = (event) => {
+      if (event.data && event.data.type === 'SET_REGISTRATION_STATUS') {
+        if (event.data.aberto === false) {
+          showInscricoesClosed();
+        } else if (event.data.aberto === true) {
+          reopenInscricoes();
+        }
+      }
+    };
+
+    async function checkInscricoesStatus() {
+      // 1. Verifica localStorage
+      const localStatus = localStorage.getItem('sorteio_inscricoes_abertas');
+      if (localStatus === 'false') {
+        showInscricoesClosed();
+        return;
+      }
+
+      // 2. Tenta ler status.json
+      try {
+        const res = await fetch('status.json?t=' + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.inscricoesAbertas === false) {
+            showInscricoesClosed();
+            return;
+          }
+        }
+      } catch (err) {}
+    }
+
+    function showInscricoesClosed() {
+      inscricoesAbertas = false;
+      const formCard = document.getElementById('form-card');
+      const closedCard = document.getElementById('closed-card');
+      if (formCard) formCard.style.display = 'none';
+      if (closedCard) closedCard.style.display = 'block';
+    }
+
+    function reopenInscricoes() {
+      inscricoesAbertas = true;
+      const formCard = document.getElementById('form-card');
+      const closedCard = document.getElementById('closed-card');
+      const reg = getDeviceRegistration();
+      if (closedCard) closedCard.style.display = 'none';
+      if (reg) {
+        showAlreadyRegistered(reg);
+      } else if (formCard) {
+        formCard.style.display = 'block';
+      }
+    }
+
+    // Ao carregar a página, checa se este celular já se cadastrou e se inscrições estão abertas
     window.addEventListener('DOMContentLoaded', () => {
+      checkInscricoesStatus();
       const reg = getDeviceRegistration();
       if (reg) {
         showAlreadyRegistered(reg);
@@ -576,6 +670,12 @@
     async function submitToGoogle(e) {
       e.preventDefault();
 
+      if (!inscricoesAbertas) {
+        alert('As inscrições foram encerradas para este sorteio!');
+        showInscricoesClosed();
+        return;
+      }
+
       // Checagem obrigatória: clicou no YouTube?
       if (!hasVisitedYt) {
         alert('⚠️ ATENÇÃO: É obrigatório clicar no botão vermelho acima para abrir e se inscrever no canal Vencendo o Divórcio antes de continuar!');
@@ -604,8 +704,8 @@
       btn.disabled = true;
       btn.innerText = 'Validando e enviando...';
 
-      // Gera código de bilhete único para o participante
-      const randomTicket = '#TICKET-' + Math.floor(100000 + Math.random() * 900000);
+      // Gera código de bilhete único e determinístico para o participante
+      const randomTicket = generateTicket(name, phone);
 
       // Envia diretamente para o seu Google Forms oficial
       if (GOOGLE_CONFIG.formUrl) {

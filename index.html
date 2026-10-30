@@ -588,6 +588,137 @@
       font-size: 0.8rem;
       color: var(--lilas);
     }
+
+    /* Badges de Ticket e Telefone */
+    .ticket-badge-pill {
+      display: inline-block;
+      background: rgba(226, 101, 42, 0.22);
+      border: 1px solid var(--laranja-2);
+      color: #ffd166;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.78rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+      margin-left: 6px;
+    }
+
+    .phone-tag {
+      font-size: 0.78rem;
+      color: var(--lilas);
+      margin-left: 8px;
+    }
+
+    /* Painel de Controle de Inscrições */
+    .reg-control-box {
+      background: linear-gradient(135deg, rgba(29, 13, 69, 0.9) 0%, rgba(44, 23, 102, 0.8) 100%);
+      border: 1px solid rgba(184, 164, 255, 0.3);
+      border-radius: 18px;
+      padding: 18px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .reg-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .reg-badge.open {
+      color: #34d399;
+    }
+
+    .reg-badge.closed {
+      color: #f87171;
+    }
+
+    .btn-toggle-reg {
+      background: #e63946;
+      color: white;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.88rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #9b1d20;
+      transition: all 0.2s;
+    }
+
+    .btn-toggle-reg:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 #9b1d20;
+      filter: brightness(1.1);
+    }
+
+    .btn-toggle-reg.is-closed {
+      background: var(--verde);
+      box-shadow: 0 4px 0 #065f46;
+    }
+
+    .btn-toggle-reg.is-closed:hover {
+      box-shadow: 0 6px 0 #065f46;
+    }
+
+    /* Destaque do Ganhador Atual na Mesa de Controle (Sem Coroa) */
+    .winner-announced-card {
+      background: linear-gradient(135deg, rgba(226, 101, 42, 0.25) 0%, rgba(29, 13, 69, 0.95) 100%);
+      border: 2px solid var(--laranja);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 22px;
+      text-align: center;
+      box-shadow: 0 15px 40px rgba(226, 101, 42, 0.3);
+      display: none;
+      animation: popWinner 0.5s ease-out;
+    }
+
+    .winner-announced-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--lilas);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .winner-announced-name {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #ffd166;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      word-break: break-word;
+    }
+
+    .winner-announced-ticket {
+      display: inline-block;
+      background: var(--laranja);
+      color: white;
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 800;
+      padding: 4px 16px;
+      border-radius: 999px;
+      margin-top: 10px;
+      box-shadow: 0 3px 0 var(--laranja-sombra);
+      letter-spacing: 0.06em;
+    }
   </style>
 </head>
 <body>
@@ -630,6 +761,29 @@
         <button class="btn-logout" onclick="lockConsole()">Sair 🔒</button>
       </div>
     </header>
+
+    <!-- Controle de Inscrições do Evento (Dentro da Mesa de Controle) -->
+    <div style="width: 100%; max-width: 1050px; margin-bottom: 20px;">
+      <div class="reg-control-box">
+        <div>
+          <div class="reg-badge open" id="reg-status-badge">
+            <span id="reg-status-icon">🟢</span>
+            <span id="reg-status-text">INSCRIÇÕES ABERTAS</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--creme); opacity: 0.85; margin-top: 4px;">
+            O público pode preencher o formulário no celular pelo QR Code normalmente.
+          </p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button id="btn-toggle-reg" class="btn-toggle-reg" onclick="toggleRegistrationStatus()">
+            🔒 ENCERRAR INSCRIÇÕES AGORA
+          </button>
+          <a href="https://docs.google.com/forms/d/1FAIpQLScJ3Cy9fncGCjtsqMXxbfHV1z7RVVAjHEq-GrJ4k75wce4YzA/edit#responses" target="_blank" rel="noopener" class="btn-action" style="font-size: 0.78rem;" title="Encerrar diretamente nos servidores da Google">
+            Google Forms ↗
+          </a>
+        </div>
+      </div>
+    </div>
 
     <!-- Banners de Acesso Rápido -->
     <div style="width: 100%; max-width: 1050px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 25px;">
@@ -732,6 +886,14 @@
           </ul>
         </div>
 
+        <!-- Card do Ganhador Sorteado (Sem Coroa) -->
+        <div class="winner-announced-card" id="winner-card">
+          <div class="winner-announced-title">Ganhador Sorteado</div>
+          <div class="winner-announced-name" id="winner-name">NOME</div>
+          <div><span class="winner-announced-ticket" id="winner-ticket">BILHETE: #TKT-0000</span></div>
+          <div id="winner-phone" style="font-size: 0.88rem; color: var(--lilas); margin-top: 8px;"></div>
+        </div>
+
         <div class="card-title" style="margin-top: 15px;">
           <span>🏆 Histórico de Ganhadores</span>
         </div>
@@ -795,13 +957,113 @@
       unlockUI();
     }
 
-    // --- Comunicação com o Telão ---
+    // --- Comunicação com o Telão e Controle ---
     const channel = new BroadcastChannel('sorteio_channel');
-    let rawNames = [];
+    let rawParticipants = [];
     let participants = [];
     let winners = [];
     let isDrawing = false;
     let pingTimeout = null;
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // =========================================================================
+    // GERADOR DE BILHETE DETERMINÍSTICO (IGUAL AO DO CADASTRO)
+    // =========================================================================
+    function generateTicket(name, phone, fallbackIndex) {
+      const cleanPhone = (phone || '').replace(/\D/g, '');
+      const words = (name || '').trim().split(/\s+/).filter(w => w.length > 0);
+      let initials = 'TK';
+      if (words.length >= 2) {
+        initials = (words[0][0] + words[words.length - 1][0]).toUpperCase();
+      } else if (words.length === 1) {
+        initials = (words[0].slice(0, 2)).toUpperCase();
+      }
+      let numPart = '';
+      if (cleanPhone.length >= 4) {
+        numPart = cleanPhone.slice(-4);
+      } else {
+        let hash = 0;
+        const s = (name + cleanPhone).toLowerCase();
+        for (let i = 0; i < s.length; i++) hash = ((hash << 5) - hash) + s.charCodeAt(i);
+        const calcNum = Math.abs(hash) % 9000 + 1000;
+        numPart = String(calcNum);
+      }
+      return `#TKT-${initials}${numPart}`;
+    }
+
+    // =========================================================================
+    // CONTROLE DE STATUS DAS INSCRIÇÕES (ABERTAS / ENCERRADAS)
+    // =========================================================================
+    let inscricoesAbertas = true;
+
+    function updateRegUI() {
+      const badge = document.getElementById('reg-status-badge');
+      const icon = document.getElementById('reg-status-icon');
+      const text = document.getElementById('reg-status-text');
+      const btn = document.getElementById('btn-toggle-reg');
+      if (!badge || !btn) return;
+
+      if (inscricoesAbertas) {
+        badge.className = 'reg-badge open';
+        icon.innerText = '🟢';
+        text.innerText = 'INSCRIÇÕES ABERTAS';
+        btn.className = 'btn-toggle-reg';
+        btn.innerText = '🔒 ENCERRAR INSCRIÇÕES AGORA';
+      } else {
+        badge.className = 'reg-badge closed';
+        icon.innerText = '🔴';
+        text.innerText = 'INSCRIÇÕES ENCERRADAS';
+        btn.className = 'btn-toggle-reg is-closed';
+        btn.innerText = '🟢 REABRIR INSCRIÇÕES';
+      }
+    }
+
+    function toggleRegistrationStatus() {
+      inscricoesAbertas = !inscricoesAbertas;
+      localStorage.setItem('sorteio_inscricoes_abertas', inscricoesAbertas ? 'true' : 'false');
+      updateRegUI();
+
+      const payload = {
+        type: 'SET_REGISTRATION_STATUS',
+        aberto: inscricoesAbertas
+      };
+      channel.postMessage(payload);
+      localStorage.setItem('sorteio_reg_status', JSON.stringify({ ...payload, ts: Date.now() }));
+
+      if (!inscricoesAbertas) {
+        alert('🔒 As inscrições foram ENCERRADAS com sucesso!\n\nNenhum novo participante conseguirá se cadastrar pelo celular.');
+      } else {
+        alert('🟢 As inscrições foram REABERTAS!\n\nO formulário já está liberado novamente para novos cadastros.');
+      }
+    }
+
+    async function initRegistrationStatus() {
+      const local = localStorage.getItem('sorteio_inscricoes_abertas');
+      if (local !== null) {
+        inscricoesAbertas = (local !== 'false');
+      } else {
+        try {
+          const res = await fetch('status.json?t=' + Date.now());
+          if (res.ok) {
+            const data = await res.json();
+            if (data && typeof data.inscricoesAbertas === 'boolean') {
+              inscricoesAbertas = data.inscricoesAbertas;
+            }
+          }
+        } catch (e) {}
+      }
+      updateRegUI();
+    }
+    initRegistrationStatus();
 
     channel.onmessage = (event) => {
       const data = event.data;
@@ -913,32 +1175,71 @@
     function extractNames(rows) {
       if (!rows.length) return;
       let nameCol = 0;
+      let phoneCol = -1;
+      let ticketCol = -1;
+
       const headers = rows[0].map(h => (h || '').toString().toLowerCase());
-      const idx = headers.findIndex(h => h.includes('nome') || h.includes('participante') || h.includes('completo'));
-      if (idx !== -1) {
-        nameCol = idx;
-        rows = rows.slice(1);
-      }
-      rawNames = rows.map(r => r[nameCol]).filter(v => v && v.toString().trim().length > 1).map(v => v.toString().trim());
+      const nIdx = headers.findIndex(h => h.includes('nome') || h.includes('participante') || h.includes('completo'));
+      if (nIdx !== -1) nameCol = nIdx;
+
+      const pIdx = headers.findIndex(h => h.includes('whats') || h.includes('tel') || h.includes('cel') || h.includes('fone'));
+      if (pIdx !== -1) phoneCol = pIdx;
+
+      const tIdx = headers.findIndex(h => h.includes('ticket') || h.includes('bilhete') || h.includes('cupom'));
+      if (tIdx !== -1) ticketCol = tIdx;
+
+      const dataRows = (nIdx !== -1 || pIdx !== -1 || tIdx !== -1) ? rows.slice(1) : rows;
+
+      rawParticipants = dataRows.map((r, i) => {
+        const name = (r[nameCol] || '').toString().trim();
+        const phone = phoneCol !== -1 ? (r[phoneCol] || '').toString().trim() : '';
+        let ticket = ticketCol !== -1 ? (r[ticketCol] || '').toString().trim() : '';
+        if (!ticket && name) {
+          ticket = generateTicket(name, phone, i + 1);
+        }
+        return { name, phone, ticket };
+      }).filter(p => p.name.length > 1);
+
       updateParticipantList();
     }
 
     function parsePastedNames() {
       const text = document.getElementById('paste-names').value;
-      rawNames = text.split(/\r?\n/).map(n => n.trim()).filter(n => n.length > 1);
+      const lines = text.split(/\r?\n/).map(n => n.trim()).filter(n => n.length > 1);
+      
+      rawParticipants = lines.map((line, i) => {
+        const parts = line.split(/[\t;]/).map(c => c.trim()).filter(c => c);
+        if (parts.length >= 2) {
+          let name = parts[0];
+          let phone = parts[1];
+          if (/^\+?\d[\d\s\-()]{7,}$/.test(parts[0]) && !/^\+?\d[\d\s\-()]{7,}$/.test(parts[1])) {
+            name = parts[1];
+            phone = parts[0];
+          }
+          const ticket = parts[2] && parts[2].includes('#TKT') ? parts[2] : generateTicket(name, phone, i + 1);
+          return { name, phone, ticket };
+        } else {
+          const name = line;
+          const ticket = generateTicket(name, '', i + 1);
+          return { name, phone: '', ticket };
+        }
+      });
+
       updateParticipantList();
     }
 
     function updateParticipantList() {
       const removeDups = document.getElementById('remove-dups').checked;
-      let cleaned = rawNames.map(n => n.trim()).filter(n => n.length > 0);
+      let cleaned = rawParticipants.filter(p => p && p.name && p.name.trim().length > 0);
 
       if (removeDups) {
         const seen = new Set();
-        cleaned = cleaned.filter(name => {
-          const lower = name.toLowerCase();
-          if (seen.has(lower)) return false;
-          seen.add(lower);
+        cleaned = cleaned.filter(p => {
+          const key = (p.phone && p.phone.replace(/\D/g, '').length >= 8) 
+            ? p.phone.replace(/\D/g, '') 
+            : p.name.toLowerCase().trim();
+          if (seen.has(key)) return false;
+          seen.add(key);
           return true;
         });
       }
@@ -962,7 +1263,13 @@
         return;
       }
       list.innerHTML = participants.slice(0, 50).map((p, i) => `
-        <li><span>#${i + 1} ${p}</span></li>
+        <li>
+          <span>
+            #${i + 1} <strong>${escapeHtml(p.name)}</strong>
+            <span class="ticket-badge-pill">${p.ticket || ''}</span>
+            ${p.phone ? `<span class="phone-tag">📞 ${escapeHtml(p.phone)}</span>` : ''}
+          </span>
+        </li>
       `).join('') + (participants.length > 50 ? `<li style="color: var(--lilas); justify-content: center;">... e mais ${participants.length - 50} participantes</li>` : '');
     }
 
@@ -972,11 +1279,14 @@
       document.getElementById('btn-master-draw').disabled = true;
 
       const winnerIndex = Math.floor(Math.random() * participants.length);
-      const winnerName = participants[winnerIndex];
+      const winner = participants[winnerIndex];
 
       const payload = {
         type: 'START_DRAW',
-        winnerName: winnerName,
+        winnerName: winner.name,
+        winnerTicket: winner.ticket,
+        winnerPhone: winner.phone,
+        winner: winner,
         participants: participants
       };
 
@@ -985,7 +1295,25 @@
 
       setTimeout(() => {
         const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        winners.unshift({ name: winnerName, time: timeStr });
+        winners.unshift({
+          name: winner.name,
+          ticket: winner.ticket,
+          phone: winner.phone,
+          time: timeStr
+        });
+
+        // Mostra o card do ganhador na mesa de controle (sem coroa)
+        const winnerCard = document.getElementById('winner-card');
+        if (winnerCard) {
+          document.getElementById('winner-name').innerText = winner.name;
+          document.getElementById('winner-ticket').innerText = 'BILHETE: ' + (winner.ticket || '#TKT-0000');
+          const phoneEl = document.getElementById('winner-phone');
+          if (phoneEl) {
+            phoneEl.innerText = winner.phone ? '📞 ' + winner.phone : '';
+          }
+          winnerCard.style.display = 'block';
+        }
+
         renderHistory();
 
         isDrawing = false;
@@ -998,6 +1326,8 @@
       const payload = { type: 'RESET' };
       channel.postMessage(payload);
       localStorage.setItem('sorteio_cmd', JSON.stringify({ ...payload, ts: Date.now() }));
+      const winnerCard = document.getElementById('winner-card');
+      if (winnerCard) winnerCard.style.display = 'none';
     }
 
     function renderHistory() {
@@ -1005,7 +1335,12 @@
       if (!winners.length) return;
       list.innerHTML = winners.map((w, idx) => `
         <li class="history-item">
-          <span>#${winners.length - idx} <strong>${w.name}</strong></span>
+          <div>
+            <span>#${winners.length - idx}</span>
+            <strong style="margin-left: 6px;">${escapeHtml(w.name)}</strong>
+            <span class="ticket-badge-pill">${w.ticket || ''}</span>
+            ${w.phone ? `<span class="phone-tag">📞 ${escapeHtml(w.phone)}</span>` : ''}
+          </div>
           <span>${w.time}</span>
         </li>
       `).join('');
@@ -1013,7 +1348,7 @@
 
     function clearList() {
       if (confirm('Deseja limpar todos os participantes carregados?')) {
-        rawNames = [];
+        rawParticipants = [];
         participants = [];
         document.getElementById('paste-names').value = '';
         document.getElementById('file-input').value = '';

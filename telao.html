@@ -224,6 +224,22 @@
       text-shadow: 0 0 50px rgba(255, 209, 102, 1), 0 0 25px rgba(226, 101, 42, 0.9) !important;
     }
 
+    .winner-ticket-pill {
+      display: inline-block;
+      font-family: var(--font-display);
+      font-size: clamp(1.2rem, 2.5vw, 2.2rem);
+      letter-spacing: 0.1em;
+      color: var(--laranja-2);
+      background: rgba(29, 13, 69, 0.92);
+      border: 2px solid var(--laranja-2);
+      padding: 6px 26px;
+      border-radius: 999px;
+      margin-top: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+
     @keyframes popWinner {
       0% { transform: scale(0.5); opacity: 0; }
       70% { transform: scale(1.15); }
@@ -360,6 +376,8 @@
       } catch (e) {}
     }
 
+    let lastWinnerTicket = '';
+
     // --- Ouvir Comandos da Produção ---
     channel.onmessage = (event) => {
       const data = event.data;
@@ -372,8 +390,9 @@
         updateStatus();
       } else if (data.type === 'START_DRAW') {
         participants = data.participants || participants;
-        const winnerName = data.winnerName;
-        runDrawAnimation(winnerName);
+        const winnerName = data.winnerName || (data.winner && data.winner.name) || '';
+        lastWinnerTicket = data.winnerTicket || (data.winner && data.winner.ticket) || '';
+        runDrawAnimation(winnerName, lastWinnerTicket);
       } else if (data.type === 'RESET') {
         resetScreen();
       }
@@ -386,7 +405,9 @@
           const data = JSON.parse(e.newValue);
           if (data.type === 'START_DRAW' && !isDrawing) {
             participants = data.participants || participants;
-            runDrawAnimation(data.winnerName);
+            const winnerName = data.winnerName || (data.winner && data.winner.name) || '';
+            lastWinnerTicket = data.winnerTicket || (data.winner && data.winner.ticket) || '';
+            runDrawAnimation(winnerName, lastWinnerTicket);
           } else if (data.type === 'UPDATE_PARTICIPANTS') {
             participants = data.participants || [];
             updateStatus();
@@ -416,7 +437,7 @@
       }
     }
 
-    function runDrawAnimation(winnerName) {
+    function runDrawAnimation(winnerName, winnerTicket) {
       if (!participants.length || isDrawing) return;
       isDrawing = true;
 
@@ -437,7 +458,9 @@
         } while (visualIdx === lastIndex && participants.length > 1);
         lastIndex = visualIdx;
 
-        display.innerText = participants[visualIdx];
+        const p = participants[visualIdx];
+        const visualName = typeof p === 'object' ? p.name : p;
+        display.innerText = visualName;
         playTickSound();
 
         elapsed += currentInterval;
@@ -453,19 +476,31 @@
         if (elapsed < totalDuration) {
           setTimeout(step, currentInterval);
         } else {
-          finishWinner(winnerName);
+          finishWinner(winnerName, winnerTicket);
         }
       }
 
       step();
     }
 
-    function finishWinner(winnerName) {
+    function finishWinner(winnerName, winnerTicket) {
       const display = document.getElementById('display-name');
       const status = document.getElementById('screen-status');
-      display.innerText = `👑 ${winnerName} 👑`;
+      const ticketToShow = winnerTicket || lastWinnerTicket;
+
+      if (ticketToShow) {
+        display.innerHTML = `
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+            <span>${winnerName}</span>
+            <span class="winner-ticket-pill">BILHETE: ${ticketToShow}</span>
+          </div>
+        `;
+      } else {
+        display.innerText = winnerName;
+      }
+
       display.classList.add('winner-highlight');
-      status.innerText = '🎉 VENCEDOR SORTEADO!';
+      status.innerText = 'VENCEDOR SORTEADO!';
 
       playVictorySound();
       launchConfetti();
